@@ -1,0 +1,102 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Linux安装Postgresql10 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Linux安装Postgresql10</h1>
+
+	<div class="text">CentOS6.5<br />
+To use the PostgreSQL Yum Repository, follow these steps: <br />
+Select version: 10<br />
+Select platform: centos6<br />
+Select architecture: x86_64<br />
+1:Install the repository RPM: <br />
+yum install https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-6-x86_64/pgdg-centos10-10-2.noarch.rpm<br />
+2:Install the client packages: <br />
+yum install postgresql10<br />
+3:Optionally install the server packages: <br />
+yum install postgresql10-server<br />
+4:Optionally initialize the database and enable automatic start: <br />
+service postgresql-10 initdb<br />
+chkconfig postgresql-10 on<br />
+service postgresql-10 start<br />
+<br />
+<br />
+CentOS7<br />
+yum install postgresql-server<br />
+postgresql-setup initdb<br />
+cd /var/lib/pgsql/data/<br />
+<br />
+vi pg_hba.conf <br />
+host    all    all    0.0.0.0/0    md5<br />
+su - postgres<br />
+ALTER USER postgres WITH PASSWORD '123456';<br /><br />
+
+vi postgresql.conf <br />
+listen_addresses = '*' <br /><br />
+systemctl start postgresql<br />
+systemctl status postgresql<br />
+systemctl enable postgresql<br />
+<br />
+<br />
+<br />
+<br />
+pgadmin4<br />
+官网下载pgadmin4-4.17-py2.py3-none-any.whl<br />
+yum install gcc python-devel<br />
+yum -y install epel-release<br />
+yum -y install python-pip<br />
+pip install --upgrade pip<br />
+pip install pgadmin4-4.17-py2.py3-none-any.whl<br />
+cd /usr/python-3.8.0/lib/python3.8/site-packages/pgadmin4/<br />
+<br />
+vi config.py <br />
+DEFAULT_SERVER = '0.0.0.0'<br />
+<br />
+python /usr/python-3.8.0/lib/python3.8/site-packages/pgadmin4/pgAdmin4.py<br />
+http://127.0.0.1:5050<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

@@ -1,0 +1,157 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hadoop1.x伪分布式安装与配置 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Hadoop1.x伪分布式安装与配置</h1>
+
+	<div class="text"><p>
+	<strong>1：设置DNS解析,确保包含127.0.0.1 sch记录</strong> 
+</p>
+<p>
+	[root@sch ~]# vi /etc/hosts<br />
+# Do not remove the following line, or various programs<br />
+# that require network functionality will fail.<br />
+127.0.0.1       sch localhost.localdomain localhost<br />
+::1             localhost6.localdomain6 localhost6
+</p>
+<p>
+	<strong>2：设置SSH免密码登录</strong> <br />
+[root@sch ~]# ssh-keygen -t rsa<br />
+[root@sch .ssh]# cp id_rsa.pub authorized_keys&nbsp;：<br />
+生成授权文件后，配置完成<br />
+测试：<br />
+[root@sch .ssh]# ssh sch<br />
+第一次需要选择yes，第二次不再需要，则表示配置成功
+</p>
+<p>
+	<strong>3：配置Hadoop伪分布式</strong> <br />
+上传hadoop压缩包到路径：/u02/hadoop/hadoop-1.1.2.tar.gz，并解压<br />
+[root@sch .ssh]# cd /u02/hadoop/<br />
+[root@sch hadoop]# tar -zxvf hadoop-1.1.2.tar.gz<br />
+[root@sch hadoop]# ls<br />
+hadoop-1.1.2 &nbsp;hadoop-1.1.2.tar.gz
+</p>
+<p>
+	<span style="line-height:1.5;"><em><strong>1）修改环境变量，添加hadoop信息</strong></em></span><br />
+<span style="line-height:1.5;">[root@sch hadoop]# vi /etc/profile</span><br />
+<span style="line-height:1.5;">export HADOOP_HOME=/u02/hadoop/hadoop-1.1.2<br />
+export JAVA_HOME=/usr/java/default<br />
+export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib<br />
+export PATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$HADOOP_HOME/bin:$HOME/bin:$PATH<br />
+export JAVA_TOOLS=$JAVA_HOME/lib/tools.jar<br />
+</span> 
+</p>
+<p>
+	<span style="line-height:1.5;"><em><strong>2）修改hadoop配置文件，位于$HADOOP_HOME/conf</strong></em></span><br />
+<span style="line-height:1.5;">指定JDK路径<br />
+[root@sch conf]# vi hadoop-env.sh&nbsp;<br />
+export JAVA_HOME=/usr/java/jdk1.6.0_23<br />
+<br />
+修改hadoop核心配置文件<br />
+[root@sch conf]# vi core-site.xml<br />
+&lt;configuration&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;hadoop.tmp.dir&lt;/name&gt;<br />
+&lt;value&gt;/home/hadoop/tmp&lt;/value&gt;<br />
+&lt;description&gt;hadoop tmp&lt;/description&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;fs.default.name&lt;/name&gt;<br />
+&lt;value&gt;hdfs://sch:9000&lt;/value&gt;<br />
+&lt;description&gt;hadoop运行临时文件主目录&lt;/description&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;<br />
+<br />
+修改hdfs配置文件<br />
+[root@sch conf]# vi hdfs-site.xml&nbsp;<br />
+&lt;configuration&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;dfs.replication&lt;/name&gt;<br />
+&lt;value&gt;1&lt;/value&gt;<br />
+&lt;description&gt;存储副本数&lt;/description&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;<br />
+<br />
+修改MapReduce配置文件 &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br />
+[root@sch conf]# vi mapred-site.xml&nbsp;<br />
+&lt;configuration&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;mapred.job.tracker&lt;/name&gt;<br />
+&lt;value&gt;sch:9001&lt;/value&gt;<br />
+&lt;description&gt;jobTracker的访问路径&lt;/description&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br />
+<br />
+<em><strong>3）运行hadoop服务</strong></em><br />
+格式化hdfs文件系统<br />
+[root@sch bin]# pwd<br />
+/u02/hadoop/hadoop-1.1.2/bin<br />
+root@sch bin]# hadoop namenode -format<br />
+注意：只是第一次启动时需格式化，如果重新格式化，可先把$HADOOP_HOME/tmp目录下的文件删掉<br />
+</span> 
+</p>
+<p>
+	<span style="line-height:1.5;">启动<br />
+[root@sch bin]# pwd<br />
+/u02/hadoop/hadoop-1.1.2/bin<br />
+[root@sch bin]# ./start-all.sh&nbsp;<br />
+[root@sch bin]# jps<br />
+5299 DataNode<br />
+5657 TaskTracker<br />
+5181 NameNode<br />
+16807 Jps<br />
+5533 JobTracker<br />
+5441 SecondaryNameNode<br />
+<br />
+启动成功<br />
+http://sch:50070/dfshealth.jsp<br />
+http://sch:50030/jobtracker.jsp<br />
+<br />
+</span> 
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

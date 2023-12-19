@@ -1,0 +1,63 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hive映射HBase表字段过多报错 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Hive映射HBase表字段过多报错</h1>
+
+	<div class="text"><strong>columns has 234 elements while hbase.columns.mapping has 92 elements (counting the key if implicit))</strong><br />
+<br />
+根本原因：<br />
+对于4000个字符，hive Metastore中SERDE_PARAMS表中PARAM_VALUE字段的字符限制是此问题的根本原因。<br />
+此限制可防止Hive创建具有高列数的表，最终导致desc或select * from失败并出现上述错误。<br />
+<br />
+解决方法：通过在hive Metastore中执行以下操作可以解决此问题<br />
+alter table SERDE_PARAMS MODIFY PARAM_VALUE VARCHAR(65535);<br />
+<div style="white-space:nowrap;">
+	<br />
+</div></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

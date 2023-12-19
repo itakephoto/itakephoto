@@ -1,0 +1,72 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>阿里云上CentOS7的LAMP环境 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>阿里云上CentOS7的LAMP环境</h1>
+
+	<div class="text">1、安装apache<br />
+# yum install httpd httpd-devel<br />
+# systemctl start&nbsp; httpd<br />
+# systemctl enable&nbsp; httpd<br />
+# systemctl status httpd<br />
+<br />
+2、安装mysql<br />
+# yum install mariadb mariadb-server mariadb-libs mariadb-devel<br />
+# systemctl start&nbsp; mariadb&nbsp;<br />
+# systemctl enable&nbsp; mariadb&nbsp;<br />
+# systemctl status&nbsp; mariadb&nbsp;<br />
+# mysql -u root -p<br />
+<br />
+3、安装PHP<br />
+# yum -y install php<br />
+# yum install php-mysql<br />
+# yum install -y php-gd php-ldap php-odbc php-pear php-xml php-xmlrpc php-mbstring php-snmp php-soap curl curl-devel php-bcmath<br />
+<br />
+4、apache服务器<br />
+# systemctl restart httpd<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

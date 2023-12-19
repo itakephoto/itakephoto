@@ -1,0 +1,85 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Greenplum高可用-Master故障转移 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Greenplum高可用-Master故障转移</h1>
+
+	<div class="text"><p>
+	<strong>当Master发生故障</strong><strong></strong> 
+</p>
+1：当Master宕机时，在Standby机器执行&nbsp;<br />
+gpactivatestandby -d ${MASTER_DATA_DIRECTORY}<br />
+<br />
+如果想在切换的同时创建一个新的Standby，可以执行如下命令<br />
+gpactivatestandby -d ${MASTER_DATA_DIRECTORY} -c new_standby_hostname<br />
+<br />
+2： 测试是否可以连接到集群（成功）<br />
+psql -d postgres<br />
+<br />
+3<span style="white-space:normal;">：</span>切换完成后，在新Master主机上连接数据库并运行ANALYZE<br />
+psql dbname -c 'ANALYZE;'<br />
+<br />
+<br />
+<p>
+	<strong>处理完Master的故障后，需要切换回Master</strong> 
+</p>
+1：在Standby主机执行如下命令，将Standby初始化到原Master主机（刚修复的问题机器）<br />
+gpinitstandby -s master_hostname<br />
+<br />
+2<span style="white-space:normal;">：</span>在当前承担Master服务的Standby主机上停止Master服务<br />
+gpstop -m<br />
+<br />
+3<span style="white-space:normal;">：</span>在Master主机上重新激活Master服务<br />
+gpactivatestandby -d $MASTER_DATA_DIRECTORY<br />
+<br />
+4<span style="white-space:normal;">：</span>激活之后，通过下面命令查看状态<br />
+gpstate -f<br />
+<br />
+5<span style="white-space:normal;">：</span>一旦状态正常，便可将原Standby主机重新初始化<br />
+gpinitstandby -s standby_hostname<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

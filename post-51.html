@@ -1,0 +1,464 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hadoop2.6+Hive1.1.1+Sqoop1.4.6安装 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Hadoop2.6+Hive1.1.1+Sqoop1.4.6安装</h1>
+
+	<div class="text"><div>
+	<br />
+</div>
+<p>
+	<strong>(1)服务器准备</strong><br />
+192.168.20.130 hadoop-master1 # NameNode,ResourceManager<br />
+192.168.20.131 hadoop-slave1&nbsp;&nbsp;&nbsp; # SecondaryNameNode,NodeManager,DataNode<br />
+192.168.20.132 hadoop-slave2&nbsp;&nbsp;&nbsp; # NodeManager,DataNode<br />
+192.168.20.133 hadoop-slave3&nbsp;&nbsp;&nbsp; # NodeManager,DataNode
+</p>
+<p>
+	<br />
+</p>
+<p>
+	<strong>(2)安装java，及ssh免密配置</strong> 
+</p>
+<p>
+	<strong><br />
+</strong> 
+</p>
+<p>
+	<strong>(3)新建文件夹</strong><br />
+/root/hadoop/data/hdfs/data<br />
+/root/hadoop/data/hdfs/name<br />
+/root/hadoop/data/hdfs/tmp
+</p>
+<p>
+	<br />
+</p>
+<p>
+	<strong>(4)解压hadoop,hive,sqoop</strong><br />
+/root/hadoop/hadoop-2.6.0<br />
+/root/hive/apache-hive-1.1.1-bin<br />
+/root/sqoop/sqoop-1.4.6
+</p>
+<p>
+	<br />
+</p>
+<p>
+	<strong>(4-1)安装hadoop</strong><br />
+<strong>vi /root/hadoop/hadoop-2.6.0/etc/hadoop/yarn-env.sh</strong><br />
+export JAVA_HOME=/usr/java/jdk1.8.0_171
+</p>
+<p>
+	<br />
+<strong>vi /root/hadoop/hadoop-2.6.0/etc/hadoop/hadoop-env.sh</strong><br />
+export JAVA_HOME=/usr/java/jdk1.8.0_171
+</p>
+<p>
+	<br />
+</p>
+<div>
+	<strong>vi /root/hadoop/hadoop-2.6.0/etc/hadoop/core-site.xml</strong> 
+</div>
+<div>
+	&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br />
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;<br />
+&lt;!--<br />
+&nbsp; Licensed under the Apache License, Version 2.0 (the "License");<br />
+&nbsp; you may not use this file except in compliance with the License.<br />
+&nbsp; You may obtain a copy of the License at
+</div>
+<div>
+	&nbsp;&nbsp;&nbsp; http://www.apache.org/licenses/LICENSE-2.0
+</div>
+<div>
+	&nbsp; Unless required by applicable law or agreed to in writing, software<br />
+&nbsp; distributed under the License is distributed on an "AS IS" BASIS,<br />
+&nbsp; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />
+&nbsp; See the License for the specific language governing permissions and<br />
+&nbsp; limitations under the License. See accompanying LICENSE file.<br />
+--&gt;
+</div>
+<div>
+	&lt;!-- Put site-specific property overrides in this file. --&gt;<br />
+&lt;configuration&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;hadoop.tmp.dir&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;/root/hadoop/data/hdfs/tmp&lt;/value&gt;<br />
+&nbsp;&lt;description&gt;A base for other temporary directories.&lt;/description&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;io.file.buffer.size&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;131072&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;fs.default.name&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;hdfs://hadoop-master1:9000&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;hadoop.proxyuser.root.hosts&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;*&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;hadoop.proxyuser.root.groups&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;*&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;fs.checkpoint.period&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;60&lt;/value&gt;<br />
+&nbsp;&lt;description&gt;The number of seconds between two periodic checkpoints.&lt;/description&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;fs.checkpoint.size&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;67108864&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;
+</div>
+<p>
+	<br />
+<strong>vi /root/hadoop/hadoop-2.6.0/etc/hadoop/hdfs-site.xml</strong> 
+</p>
+<p>
+	<strong><br />
+</strong> 
+</p>
+<div>
+	&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br />
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;<br />
+&lt;!--<br />
+&nbsp; Licensed under the Apache License, Version 2.0 (the "License");<br />
+&nbsp; you may not use this file except in compliance with the License.<br />
+&nbsp; You may obtain a copy of the License at
+</div>
+<div>
+	&nbsp;&nbsp;&nbsp; http://www.apache.org/licenses/LICENSE-2.0
+</div>
+<div>
+	&nbsp; Unless required by applicable law or agreed to in writing, software<br />
+&nbsp; distributed under the License is distributed on an "AS IS" BASIS,<br />
+&nbsp; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />
+&nbsp; See the License for the specific language governing permissions and<br />
+&nbsp; limitations under the License. See accompanying LICENSE file.<br />
+--&gt;
+</div>
+<div>
+	&lt;!-- Put site-specific property overrides in this file. --&gt;
+</div>
+<div>
+	&lt;configuration&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;dfs.replication&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;3&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;/root/hadoop/data/hdfs/name&lt;/value&gt;<br />
+&nbsp;&lt;final&gt;true&lt;/final&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;/root/hadoop/data/hdfs/data&lt;/value&gt;<br />
+&nbsp;&lt;final&gt;true&lt;/final&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;dfs.http.address&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;hadoop-master1:50070&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;dfs.namenode.secondary.http-address&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;hadoop-slave1:50090&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;dfs.webhdfs.enabled&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;dfs.permissions&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;false&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;
+</div>
+<p>
+	<br />
+<strong>vi /root/hadoop/hadoop-2.6.0/etc/hadoop/mapred-site.xml</strong> 
+</p>
+<p>
+	<strong><br />
+</strong> 
+</p>
+<div>
+	&lt;?xml version="1.0"?&gt;<br />
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;<br />
+&lt;!--<br />
+&nbsp; Licensed under the Apache License, Version 2.0 (the "License");<br />
+&nbsp; you may not use this file except in compliance with the License.<br />
+&nbsp; You may obtain a copy of the License at
+</div>
+<div>
+	&nbsp;&nbsp;&nbsp; http://www.apache.org/licenses/LICENSE-2.0
+</div>
+<div>
+	&nbsp; Unless required by applicable law or agreed to in writing, software<br />
+&nbsp; distributed under the License is distributed on an "AS IS" BASIS,<br />
+&nbsp; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />
+&nbsp; See the License for the specific language governing permissions and<br />
+&nbsp; limitations under the License. See accompanying LICENSE file.<br />
+--&gt;
+</div>
+<div>
+	<br />
+&lt;!-- Put site-specific property overrides in this file. --&gt;
+</div>
+<div>
+	&lt;configuration&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;name&gt;mapreduce.framework.name&lt;/name&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;value&gt;yarn&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;
+</div>
+<div>
+	<br />
+<strong>vi /root/hadoop/hadoop-2.6.0/etc/hadoop/yarn-site.xml</strong> 
+</div>
+<div>
+	<br />
+&lt;?xml version="1.0"?&gt;<br />
+&lt;!--<br />
+&nbsp; Licensed under the Apache License, Version 2.0 (the "License");<br />
+&nbsp; you may not use this file except in compliance with the License.<br />
+&nbsp; You may obtain a copy of the License at
+</div>
+<div>
+	&nbsp;&nbsp;&nbsp; http://www.apache.org/licenses/LICENSE-2.0
+</div>
+<div>
+	&nbsp; Unless required by applicable law or agreed to in writing, software<br />
+&nbsp; distributed under the License is distributed on an "AS IS" BASIS,<br />
+&nbsp; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />
+&nbsp; See the License for the specific language governing permissions and<br />
+&nbsp; limitations under the License. See accompanying LICENSE file.<br />
+--&gt;
+</div>
+<div>
+	&lt;configuration&gt;
+</div>
+<p>
+	&lt;!-- Site specific YARN configuration properties --&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;yarn.resourcemanager.address&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;hadoop-master1:18040&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;yarn.resourcemanager.scheduler.address&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;hadoop-master1:18030&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;yarn.resourcemanager.webapp.address&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;hadoop-master1:18088&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;yarn.resourcemanager.resource-tracker.address&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;hadoop-master1:18025&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;yarn.resourcemanager.admin.address&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;hadoop-master1:18141&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;mapreduce_shuffle&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;yarn.nodemanager.aux-services.mapreduce.shuffle.class&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;org.apache.hadoop.mapred.ShuffleHandler&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;
+</p>
+<p>
+	<br />
+</p>
+<div>
+	<strong>vi /root/hadoop/hadoop-2.6.0/etc/hadoop/masters</strong><br />
+hadoop-master1
+</div>
+<p>
+	<br />
+<strong>vi /root/hadoop/hadoop-2.6.0/etc/hadoop/slaves</strong><br />
+hadoop-slave1<br />
+hadoop-slave2<br />
+hadoop-slave3
+</p>
+<p>
+	<br />
+</p>
+<div>
+	<strong>运行hadoop,yarn</strong><br />
+/root/hadoop/hadoop-2.6.0/bin/hadoop namenode -format<br />
+/root/hadoop/hadoop-2.6.0/sbin/start-all.sh<br />
+/root/hadoop/hadoop-2.6.0/sbin/stop-all.sh
+</div>
+<div>
+	http://192.168.30.130:50070/dfshealth.html<br />
+http://192.168.30.130:18088/cluster<br />
+/root/hadoop/hadoop-2.6.0/bin/hadoop dfsadmin -report
+</div>
+<p>
+	<br />
+<strong>(4-2)安装hive</strong> 
+</p>
+<p>
+	<br />
+<strong>vi /root/hive/apache-hive-1.1.1-bin/conf/hive-env.sh</strong> 
+</p>
+<p>
+	HADOOP_HOME=/root/hadoop/hadoop-2.6.0
+</p>
+<p>
+	<br />
+</p>
+<p>
+	<strong>vi /root/hive/apache-hive-1.1.1-bin/conf/hive-exec-log4j.properties</strong><br />
+hive.log.dir=/root/hive/apache-hive-1.1.1-bin/logs
+</p>
+<p>
+	<br />
+</p>
+<p>
+	<strong>vi /root/hive/apache-hive-1.1.1-bin/conf/hive-log4j.properties</strong><br />
+hive.log.dir=/root/hive/apache-hive-1.1.1-bin/logs
+</p>
+<p>
+	<br />
+</p>
+<div>
+	<strong>vi /root/hive/apache-hive-1.1.1-bin/conf/hive-site.xml</strong> 
+</div>
+<div>
+	&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;<br />
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;<br />
+&lt;configuration&gt;<br />
+&nbsp;&lt;!--Hive作业的HDFS根目录位置 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp; &lt;name&gt;hive.exec.scratchdir&lt;/name&gt;<br />
+&nbsp; &lt;value&gt;/user/hive/tmp&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--Hive作业的HDFS根目录创建写权限 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp; &lt;name&gt;hive.scratch.dir.permission&lt;/name&gt;<br />
+&nbsp; &lt;value&gt;755&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--hdfs上hive元数据存放位置 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.metastore.warehouse.dir&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;/user/hive/warehouse&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--连接数据库地址，名称 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;javax.jdo.option.ConnectionURL&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;jdbc:mysql://hadoop-master1:3306/hive_metastore?createDatabaseIfNotExist=true&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--连接数据库驱动 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;javax.jdo.option.ConnectionDriverName&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--连接数据库用户名称 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;javax.jdo.option.ConnectionUserName&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;root&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--连接数据库用户密码 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;javax.jdo.option.ConnectionPassword&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;123456&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--客户端显示当前查询表的头信息 --&gt;<br />
+&nbsp; &lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.cli.print.header&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;true&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--客户端显示当前数据库名称信息 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.cli.print.current.db&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;true&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&lt;/configuration&gt;
+</div>
+<p>
+	<br />
+</p>
+<p>
+	<strong>cp /root/hive/apache-hive-1.1.1-bin/lib/jline-2.12.jar /root/hadoop/hadoop-2.6.0/share/hadoop/yarn/lib/</strong><strong></strong><br />
+<strong>上传 mysql-connector-java-5.1.26.jar&nbsp; 到 /root/hive/apache-hive-1.1.1-bin/lib</strong><br />
+<strong>启动相应服务 /root/hive/apache-hive-1.1.1-bin/bin</strong> 
+</p>
+<p>
+	<br />
+<strong>(4-3)安装sqoop</strong> 
+</p>
+<p>
+	<br />
+<strong>vi /root/sqoop/sqoop-1.4.6/conf/sqoop-env.sh</strong><br />
+export HADOOP_COMMON_HOME=/root/hadoop/hadoop-2.6.0<br />
+export HADOOP_MAPRED_HOME=/root/hadoop/hadoop-2.6.0<br />
+export HIVE_HOME=/root/hive/apache-hive-1.1.1-bin
+</p>
+<p>
+	<br />
+</p>
+<div>
+	<strong>上传 mysql-connector-java-5.1.26.jar&nbsp; 到 /root/sqoop/sqoop-1.4.6/lib</strong><br />
+<strong>上传 sqoop-1.4.6.jar 到 /root/sqoop/sqoop-1.4.6/lib</strong> 
+</div>
+<div>
+	<strong>测试连接 ./sqoop&nbsp; list-databases --connect jdbc:mysql://127.0.0.1:3306/ --username root --password 123456</strong> 
+</div>
+<div>
+	<br />
+</div>
+<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

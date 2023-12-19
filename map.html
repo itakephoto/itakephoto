@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>我的足迹</title>
+  <style type="text/css">
+* {
+  margin: 0;
+  padding: 0;
+}
+#chart-container {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+</style>
+</head>
+<body>
+  <div id="chart-container"></div>
+  <script src="https://lijiahong.com/echarts.min.js"></script>
+  <script src="https://api.map.baidu.com/api?v=3.0&ak=QQOBUWXeVXfscWArZa4kZfZpKqPqlx46"></script>
+  <script src="https://lijiahong.com/bmap.min.js"></script>
+  <script src="https://lijiahong.com/data.js"></script>
+  <script type="text/javascript">
+var dom = document.getElementById('chart-container');
+var myChart = echarts.init(dom, null, {
+  renderer: 'canvas',
+  useDirtyRect: false
+});
+var app = {};
+
+var option;
+
+option = {
+  title: {
+    text: '我的足迹-更新ing',
+    subtext: '与其向往 不如出发',
+    sublink: 'http://lijiahong.com',
+    left: 'center'
+  },
+  bmap: {
+    center: [104.114129, 37.550339],
+    zoom: 5,
+    roam: true,
+    mapStyle: {
+      styleJson: [
+        {
+          featureType: 'water',
+          elementType: 'all',
+          stylers: {
+            color: '#d1d1d1'
+          }
+        },
+        {
+          featureType: 'land',
+          elementType: 'all',
+          stylers: {
+            color: '#f3f3f3'
+          }
+        },
+        {
+          featureType: 'railway',
+          elementType: 'all',
+          stylers: {
+            visibility: 'off'
+          }
+        },
+        {
+          featureType: 'highway',
+          elementType: 'all',
+          stylers: {
+            color: '#fdfdfd'
+          }
+        },
+        {
+          featureType: 'highway',
+          elementType: 'labels',
+          stylers: {
+            visibility: 'off'
+          }
+        },
+        {
+          featureType: 'arterial',
+          elementType: 'geometry',
+          stylers: {
+            color: '#fefefe'
+          }
+        },
+        {
+          featureType: 'arterial',
+          elementType: 'geometry.fill',
+          stylers: {
+            color: '#fefefe'
+          }
+        },
+        {
+          featureType: 'poi',
+          elementType: 'all',
+          stylers: {
+            visibility: 'off'
+          }
+        },
+        {
+          featureType: 'green',
+          elementType: 'all',
+          stylers: {
+            visibility: 'off'
+          }
+        },
+        {
+          featureType: 'subway',
+          elementType: 'all',
+          stylers: {
+            visibility: 'off'
+          }
+        },
+        {
+          featureType: 'manmade',
+          elementType: 'all',
+          stylers: {
+            color: '#d1d1d1'
+          }
+        },
+        {
+          featureType: 'local',
+          elementType: 'all',
+          stylers: {
+            color: '#d1d1d1'
+          }
+        },
+        {
+          featureType: 'arterial',
+          elementType: 'labels',
+          stylers: {
+            visibility: 'off'
+          }
+        },
+        {
+          featureType: 'boundary',
+          elementType: 'all',
+          stylers: {
+            color: '#fefefe'
+          }
+        },
+        {
+          featureType: 'building',
+          elementType: 'all',
+          stylers: {
+            color: '#d1d1d1'
+          }
+        },
+		{
+          featureType: 'district',
+          elementType: 'all',
+          stylers: {
+            visibility: 'off'
+          }
+        },
+        {
+          featureType: 'label',
+          elementType: 'labels.text.fill',
+          stylers: {
+            color: '#999999'
+          }
+        }
+      ]
+    }
+  },
+  series: [
+    {
+      name: '我的足迹',
+      type: 'scatter',
+      coordinateSystem: 'bmap',
+      data: data,
+      symbolSize:10/*function (val) {
+        return val[2] / 10;
+      }*/,
+      encode: {
+        value: 2
+      },
+      label: {
+        formatter: '{b}',
+        position: 'right',
+        show: false
+      },
+      emphasis: {
+        label: {
+          show: true
+        }
+      }
+    }
+  ]
+};
+
+
+if (option && typeof option === 'object') {
+  myChart.setOption(option);
+}
+
+window.addEventListener('resize', myChart.resize);
+  
+</script>
+</body>
+</html>

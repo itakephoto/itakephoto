@@ -1,0 +1,278 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>HIVE2.3.3安装(on Hadoop 2.8.5) - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>HIVE2.3.3安装(on Hadoop 2.8.5)</h1>
+
+	<div class="text"><div>
+	<strong>1:解压apache-hive-2.3.3-bin.tar.gz</strong><br />
+/root/apache-hive-2.3.3-bin<br />
+拷贝mysql-connector-java-5.1.26.jar到/root/apache-hive-2.3.3-bin/lib/
+</div>
+<p>
+	<br />
+</p>
+<div>
+	<strong>2:修改/root/apache-hive-2.3.3-bin/conf/hive-env.sh</strong><br />
+# Set HADOOP_HOME to point to a specific hadoop install directory<br />
+HADOOP_HOME=/root/hadoop-2.8.5
+# Hive Configuration Directory can be controlled by:<br />
+export HIVE_CONF_DIR=/root/apache-hive-2.3.3-bin/conf
+</div>
+<p>
+	<br />
+</p>
+<div>
+	<strong>3:修改/root/apache-hive-2.3.3-bin/conf/hive-site.xml</strong><br />
+[root@hadoop-master1 conf]# vi hive-site.xml
+</div>
+<p>
+	&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;<br />
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;<br />
+&lt;configuration&gt;<br />
+&nbsp;&lt;!--Hive作业的HDFS根目录位置 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp;&lt;name&gt;hive.exec.scratchdir&lt;/name&gt;<br />
+&nbsp;&nbsp;&lt;value&gt;/user/hive/tmp&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--Hive作业的HDFS根目录创建写权限 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp;&lt;name&gt;hive.scratch.dir.permission&lt;/name&gt;<br />
+&nbsp;&nbsp;&lt;value&gt;755&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--hdfs上hive元数据存放位置 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.metastore.warehouse.dir&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;/user/hive/warehouse&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--连接数据库地址，名称 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;javax.jdo.option.ConnectionURL&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;jdbc:mysql://hadoop-master1:3306/hive_metastore?createDatabaseIfNotExist=true&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--连接数据库驱动 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;javax.jdo.option.ConnectionDriverName&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--连接数据库用户名称 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;javax.jdo.option.ConnectionUserName&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;root&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--连接数据库用户密码 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;javax.jdo.option.ConnectionPassword&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;root&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--客户端显示当前查询表的头信息 --&gt;<br />
+&nbsp; &lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.cli.print.header&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;true&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&nbsp;&lt;!--客户端显示当前数据库名称信息 --&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.cli.print.current.db&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;true&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&lt;/configuration&gt;
+</p>
+<p>
+	<br />
+</p>
+<div>
+	<strong>4:修改/root/apache-hive-2.3.3-bin/conf/hive-log4j2.properties</strong><br />
+[root@hadoop-master1 conf]# vi hive-log4j2.properties
+</div>
+<div>
+	# list of properties<br />
+property.hive.log.level = INFO<br />
+property.hive.root.logger = DRFA<br />
+property.hive.log.dir = /root/apache-hive-2.3.3-bin/log<br />
+property.hive.log.file = hive.log<br />
+property.hive.perflogger.log.level = INFO
+</div>
+<p>
+	<br />
+<strong>5:启动metastore服务</strong> 
+</p>
+<p>
+	/root/apache-hive-2.3.3-bin/bin/schematool -dbType mysql -initSchema&nbsp;
+</p>
+<p>
+	/root/apache-hive-2.3.3-bin/bin/hive --service metastore
+</p>
+<p>
+	<br />
+</p>
+<div>
+	<strong>6:配置hive client</strong><br />
+拷贝hadoop-master1:/root/apache-hive-2.3.3-bin到hadoop-slave1:/root/apache-hive-2.3.3-bin<br />
+修改/root/apache-hive-2.3.3-bin/conf/hive-site.xml<br />
+[root@hadoop-master1 conf]# vi hive-site.xml <br />
+&lt;?xml version="1.0" encoding="UTF-8" standalone="no"?&gt;<br />
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;<br />
+&lt;configuration&gt;<br />
+&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp;&lt;name&gt;hive.exec.scratchdir&lt;/name&gt;<br />
+&nbsp;&nbsp;&lt;value&gt;/user/hive/tmp&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;
+</div>
+<div>
+	&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp;&lt;name&gt;hive.scratch.dir.permission&lt;/name&gt;<br />
+&nbsp;&nbsp;&lt;value&gt;755&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;
+</div>
+<div>
+	&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.metastore.warehouse.dir&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;/user/hive/warehouse&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;
+</div>
+<div>
+	&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.metastore.uris&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;thrift://hadoop-master1:9083&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;
+</div>
+<div>
+	&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.cli.print.current.db&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;true&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;
+</div>
+<div>
+	&nbsp;&lt;property&gt;<br />
+&nbsp;&nbsp; &lt;name&gt;hive.cli.print.header&lt;/name&gt;<br />
+&nbsp;&nbsp; &lt;value&gt;true&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+&lt;/configuration&gt;
+</div>
+<div>
+	<br />
+<strong>7:启动hivesever2服务</strong><br />
+/root/apache-hive-2.3.3-bin/bin/hiveserver2
+</div>
+<br />
+<div>
+	附：java连接hivesever2<br />
+添加/root/apache-hive-2.3.3-bin/jdbc/hive-jdbc-2.3.3-standalone.jar到build path<br />
+</div>
+<pre>package com.lijiahong.hive.jdbc; 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+public class Test {
+
+    private static String driverName = "org.apache.hive.jdbc.HiveDriver";
+    private static String connctUrl = "jdbc:hive2://192.168.20.130:10000/dw";
+    private static String userName = "root";
+    private static String password = "123456";
+    
+    public static void main(String[] args) throws Exception {
+        Class.forName(driverName);
+   
+        Connection con = DriverManager.getConnection(connctUrl, userName, password);
+        Statement stmt = con.createStatement();
+         
+        ResultSet res = stmt.executeQuery( "select * from dw.test01" );
+        while (res.next()) {
+            System.out.println( res.getInt(1) +"," + res.getString(2)  );
+        }    
+        stmt.close();
+        con.close();
+    }
+} 
+
+</pre>
+<div>
+	<strong>8:客制化hiveserver2的jdbc账号密码验证</strong><br />
+编写java账号密码验证代码
+</div>
+<br />
+<pre>package com.lijiahong.hive.jdbc.auth;
+
+import javax.security.sasl.AuthenticationException;
+import org.apache.hive.service.auth.PasswdAuthenticationProvider;
+
+public class CustomPasswdAuthentication implements PasswdAuthenticationProvider {  
+    
+    @Override
+    public void Authenticate(String user, String password) throws AuthenticationException {
+       if(user.equals("root") &amp;&amp; password.equals("123456") ) {
+           System.out.println("user [" + user + "] auth check ok .. ");
+       }
+       else {
+           System.out.println("user [" + user + "] auth check fail .. ");
+           throw new AuthenticationException("user [" + user + "] auth check fail .. ");
+       } 
+    }
+} 
+</pre>
+<div>
+	编译成功后打包成CustomPasswdAuthentication.jar<br />
+上传到/root/apache-hive-2.3.3-bin/lib
+</div>
+<br />
+<div>
+	修改/root/apache-hive-2.3.3-bin/conf/hive-site.xml添加<br />
+<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;hive.server2.authentication&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;CUSTOM&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;hive.server2.custom.authentication.class&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;com.lijiahong.hive.jdbc.auth.CustomPasswdAuthentication&lt;/value&gt;<br />
+&lt;/property&gt;
+</div>
+<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

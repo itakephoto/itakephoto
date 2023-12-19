@@ -1,0 +1,115 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>实践centos7.6 mariadb 主从复制 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>实践centos7.6 mariadb 主从复制</h1>
+
+	<div class="text"><a target="_blank" href="https://lijiahong.com/81d31569226544.png" id="ematt:37"><img src="https://lijiahong.com/81d31569226544.png" title="点击查看原图" alt="MYSQL主从复制关系图.png" border="0" width="640" height="652" /></a> 
+<pre>实践centos7.6 mariadb 主从复制
+服务器IP:
+主：192.168.184.12
+从：192.168.184.13
+
+
+主服务器配置
+#vi /etc/my.cnf
+log-bin=/var/lib/mysql/bin_log
+server-id=1
+
+重启主服务器
+systemctl restart mariadb.service
+
+主服务器上授权一个有复制权限的帐号 
+mysql -u root
+GRANT REPLICATION SLAVE,REPLICATION CLIENT ON *.* TO 'repluser'@'192.168.184.13' IDENTIFIED BY 'replpass';
+FLUSH PRIVILEGES;
+
+
+从服务器配置
+#vi /etc/my.cnf
+relay-log=/var/lib/mysql/bin_log
+server-id=2
+
+重启从服务器
+systemctl restart mariadb.service
+
+从服务器指定日志从哪个位置开始复制
+mysql -u root
+CHANGE MASTER TO MASTER_HOST='192.168.184.12',
+MASTER_USER='repluser',MASTER_PASSWORD='replpass',MASTER_LOG_FILE='bin_log.000001',MASTER_LOG_POS=245; 
+
+从服务器启动slave
+start slave;
+
+可能出现错误：ERROR 1872 (HY000): Slave failed to initialize relay log info structure from the repository
+reset slave;
+
+从服务器查看从服务器状态
+show slave status;
+
+主服务器查看从服务器状态
+show slave hosts;
+
+文章参考：https://www.cnblogs.com/xiaocen/p/3702945.html
+文章参考：https://blog.csdn.net/edwzhang/article/details/17226975
+在source那边，执行：
+
+flush logs;
+show master status;
+
+记下File, Position。
+
+在target端，执行：
+
+CHANGE MASTER TO MASTER_LOG_FILE='testdbbinlog.000008',MASTER_LOG_POS=107;
+slave start;
+show slave status \G
+
+一切正常。
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

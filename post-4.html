@@ -1,0 +1,160 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>在Linux环境下安装Oracle Database 11g - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>在Linux环境下安装Oracle Database 11g</h1>
+
+	<div class="text"><strong>(1)操作系统环境</strong><br />
+Oracle Enterprise Linux 5, and Red Hat Enterprise Linux 5<br /><br />
+<strong>(2)相关包检查，检查命令格式如下：rpm -qa | grep 名字</strong><br />
+rpm -qa | grep binutils-2.17.50.0.6 <br />
+rpm -qa | grep compat-libstdc++-33-3.2.3&nbsp;<br />
+rpm -qa | grep elfutils-libelf-0.125 <br />
+rpm -qa | grep elfutils-libelf-devel-0.125&nbsp;<br />
+rpm -qa | grep elfutils-libelf-devel-static-0.125&nbsp;<br />
+rpm -qa | grep gcc-4.1.2				 &nbsp;<br />
+rpm -qa | grep gcc-c++-4.1.2 <br />
+rpm -qa | grep glibc-2.5-24 <br />
+rpm -qa | grep glibc-common-2.5			 &nbsp; &nbsp; &nbsp; &nbsp;<br />
+rpm -qa | grep glibc-devel-2.5 <br />
+rpm -qa | grep glibc-headers-2.5 <br />
+rpm -qa | grep kernel-headers-2.6.18 <br />
+rpm -qa | grep ksh-20060214&nbsp;<br />
+rpm -qa | grep libaio-0.3.106 <br />
+rpm -qa | grep libaio-devel-0.3.106&nbsp;<br />
+rpm -qa | grep libgcc-4.1.2 <br />
+rpm -qa | grep libgomp-4.1.2 <br />
+rpm -qa | grep libstdc++-4.1.2 			 &nbsp; &nbsp; &nbsp; &nbsp;<br />
+rpm -qa | grep libstdc++-devel-4.1.2	&nbsp;<br />
+rpm -qa | grep make-3.81 <br />
+rpm -qa | grep numactl-devel-0.9.8.i386 &nbsp;<br />
+rpm -qa | grep sysstat-7.0.2 <br />
+rpm -qa | grep unixODBC-2.2.11&nbsp;<br />
+rpm -qa | grep unixODBC-devel-2.2.11&nbsp;<br />
+<br />
+从 CentOS-5.5-i386-bin-DVD.iso\CentOS 文件找到缺少的包， 并且上传<br />
+ls *.rpm<br />
+rpm -ivh *.rpm<br />
+<br />
+<strong>(3)安装前准备，设置，修改环境变量等</strong><br />
+#增加组和用户
+groupadd oinstall<br />
+groupadd dba<br />
+mkdir -p /u01/oracle &nbsp;//创建用户跟目录<br />
+#添加一个oracle用户， 根目录是 /u01/oracle， 主的组是 oinstall 副的组是dba<br />
+useradd -g oinstall -G dba -d /u01/oracle oracle<br />
+#为oracle用户设置密码 123456<br />
+passwd oracle<br />
+<br />
+##拷贝必要的文件<br />
+cp /etc/skel/.bash_profile /u01/oracle<br />
+cp /etc/skel/.bashrc /u01/oracle<br />
+cp /etc/skel/.bash_logout /u01/oracle<br />
+<br />
+##把/u01划给oracle<br />
+chown -R oracle:oinstall /u01/oracle<br />
+<br />
+<br />
+#检查 nobody 是否存在<br />
+id nobody<br />
+#缺省存在的。如果不存在&nbsp;<br />
+/usr/sbin/useradd -g nobody<br />
+<br />
+#相关系统设定<br />
+vi /etc/sysctl.conf<br />
+<br />
+fs.aio-max-nr = 1048576<br />
+fs.file-max = 6815744<br />
+kernel.shmall = 2097152<br />
+kernel.shmmax = 536870912<br />
+kernel.shmmni = 4096<br />
+kernel.sem = 250 32000 100 128<br />
+net.ipv4.ip_local_port_range = 9000 65500<br />
+net.core.rmem_default = 262144<br />
+net.core.rmem_max = 4194304<br />
+net.core.wmem_default = 262144<br />
+net.core.wmem_max = 1048586<br />
+<br />
+<br />
+vi /etc/security/limits.conf<br />
+<br />
+oracle &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; soft &nbsp; &nbsp;nproc &nbsp; 2047<br />
+oracle &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; hard &nbsp; &nbsp;nproc &nbsp; 16384<br />
+oracle &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; soft &nbsp; &nbsp;nofile &nbsp;1024<br />
+oracle &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; hard &nbsp; &nbsp;nofile &nbsp;65536<br />
+<br />
+<br />
+vi /etc/pam.d/login&nbsp;<br />
+<br />
+session &nbsp; &nbsp;required &nbsp; &nbsp; pam_limits.so<br />
+=================================================<br />
+<br />
+#设置oracle 用户环境变量<br />
+su - oracle<br />
+#进入oracle主目录<br />
+cd /u01/oracle<br />
+<br />
+vi .bash_profile<br />
+export ORACLE_BASE=/u01<br />
+export ORACLE_HOME=$ORACLE_BASE/oracle<br />
+export ORACLE_SID=orcl<br />
+export NLS_LANG="american_america.UTF8"<br />
+export PATH=$ORACLE_HOME/bin:$PATH:$HOME/bin<br />
+<br />
+#oracle网站下载oracle for linux 11g<br />
+unzip linux_11gR2_database_1of2.zip<br />
+mv database /u01/<br />
+cd /u01<br />
+su<br />
+chown -R oracle:oinstall database/<br />
+<br />
+修改配置比较多东西， 重启一下系统。<br />
+<div style="white-space:nowrap;">
+	<br />
+</div></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

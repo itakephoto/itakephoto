@@ -1,0 +1,67 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Oracle查看表空间大小及使用情况 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Oracle查看表空间大小及使用情况</h1>
+
+	<div class="text">SELECT a.tablespace_name "表空间名",<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; total "表空间大小",<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; free "表空间剩余大小",<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (total - free) "表空间使用大小",<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; total / (1024 * 1024 * 1024) "表空间大小(G)",<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; free / (1024 * 1024 * 1024) "表空间剩余大小(G)",<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (total - free) / (1024 * 1024 * 1024) "表空间使用大小(G)",<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; round((total - free) / total, 4) * 100 "使用率 %"<br />
+&nbsp; FROM (SELECT tablespace_name, SUM(bytes) free<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FROM dba_free_space<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GROUP BY tablespace_name) a,<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; (SELECT tablespace_name, SUM(bytes) total<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FROM dba_data_files<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GROUP BY tablespace_name) b<br />
+&nbsp;WHERE a.tablespace_name = b.tablespace_name;<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

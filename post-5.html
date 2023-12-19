@@ -1,0 +1,184 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Linux安装Informatica的环境变量及ODBC配置 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Linux安装Informatica的环境变量及ODBC配置</h1>
+
+	<div class="text">#vi&nbsp; .bash_profile<br />
+# oracle&nbsp; #<br />
+export ORACLE_BASE=/u01<br />
+export ORACLE_HOME=$ORACLE_BASE/oracle<br />
+export ORACLE_SID=orcl<br />
+export NLS_LANG="american_america.UTF8"<br />
+export PATH=$ORACLE_HOME/bin:$PATH:$HOME/bin<br />
+<br />
+# informatica #<br />
+export LANG=en_US.UTF-8<br />
+export INFA_CODEPAGENAME="MS936"<br />
+export INFA_HOME=/u02/Informatica/9.5.1<br />
+export CLASSPATH=.:$ORACLE_HOME/lib:$INFA_HOME/server/bin<br />
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib:$INFA_HOME/ODBC7.0/lib:$INFA_HOME/server/bin:$LD_LIBRARY_PATH<br />
+export PATH=$INFA_HOME/server/bin:$PATH<br />
+export INFA_DOMAINS_FILE=/u02/Informatica/9.5.1/server/domains.infa<br />
+<br />
+# informatica ODBC #<br />
+export ODBCHOME=$INFA_HOME/ODBC7.0<br />
+export PATH=$PATH:$ODBCHOME/bin<br />
+export LD_LIBRARY_PATH=$ODBCHOME/lib:$LD_LIBRARY_PATH<br />
+export ODBCINI=/u01/oracle/.odbc.ini<br />
+<br />
+社区版的mysql需要安装unixODBC,和mysql-odbc驱动&nbsp;<br />
+# isql -v MYSQL5<br />
+# yum install *unixODBC* *mysql-connector-odbc*&nbsp;<br />
+# cat /u01/oracle/.odbc.ini<br />
+<br />
+[ODBC Data Sources]<br />
+SQL2008=DataDirect 7.0 SQL Server Legacy Wire Protocol<br />
+MYSQL5=DataDirect 7.0 MySQL Wire Protocol<br />
+<br />
+[ODBC]<br />
+IANAAppCodePage=4<br />
+InstallDir=/u02/Informatica/9.5.1/ODBC7.0<br />
+Trace=0<br />
+TraceFile=odbctrace.out<br />
+TraceDll=/u02/Informatica/9.5.1/ODBC7.0/lib/DWtrc26.so<br />
+<br />
+<br />
+[SQL2008]<br />
+Driver=/u02/Informatica/9.5.1/ODBC7.0/lib/DWsqls26.so<br />
+Description=DataDirect 7.0 SQL Server Wire Protocol<br />
+AlternateServers=<br />
+AlwaysReportTriggerResults=0<br />
+AnsiNPW=1<br />
+ApplicationName=<br />
+ApplicationUsingThreads=1<br />
+AuthenticationMethod=1<br />
+BulkBinaryThreshold=32<br />
+BulkCharacterThreshold=-1<br />
+BulkLoadBatchSize=1024<br />
+BulkLoadFieldDelimiter=<br />
+BulkLoadOptions=2<br />
+BulkLoadRecordDelimiter=<br />
+ConnectionReset=0<br />
+ConnectionRetryCount=0<br />
+ConnectionRetryDelay=3<br />
+Database=infa_rep<br />
+EnableBulkLoad=0<br />
+EnableQuotedIdentifiers=0<br />
+EncryptionMethod=0<br />
+FailoverGranularity=0<br />
+FailoverMode=0<br />
+FailoverPreconnect=0<br />
+FetchTSWTZasTimestamp=0<br />
+FetchTWFSasTime=1<br />
+GSSClient=native<br />
+HostName=192.168.140.129<br />
+HostNameInCertificate=<br />
+InitializationString=<br />
+Language=<br />
+LoadBalanceTimeout=0<br />
+LoadBalancing=0<br />
+LoginTimeout=15<br />
+LogonID=sa<br />
+MaxPoolSize=100<br />
+MinPoolSize=0<br />
+PacketSize=-1<br />
+Password=123456<br />
+Pooling=0<br />
+PortNumber=1433<br />
+QueryTimeout=0<br />
+ReportCodePageConversionErrors=0<br />
+SnapshotSerializable=0<br />
+TrustStore=<br />
+TrustStorePassword=<br />
+ValidateServerCertificate=1<br />
+WorkStationID=<br />
+XMLDescribeType=-10<br />
+<br />
+<br />
+[MYSQL5]<br />
+#Driver=/u02/Informatica/9.5.1/ODBC7.0/lib/DWmysql26.so<br />
+Driver=/usr/lib/libmyodbc5w.so<br />
+Description=DataDirect 7.0 MySQL Wire Protocol<br />
+AlternateServers=<br />
+ApplicationUsingThreads=1<br />
+ConnectionReset=0<br />
+ConnectionRetryCount=0<br />
+ConnectionRetryDelay=3<br />
+Database=test<br />
+DefaultLongDataBuffLen=1024<br />
+EnableDescribeParam=0<br />
+EncryptionMethod=0<br />
+FailoverGranularity=0<br />
+FailoverMode=0<br />
+FailoverPreconnect=0<br />
+HostName=127.0.0.1<br />
+HostNameInCertificate=<br />
+InteractiveClient=0<br />
+LicenseNotice=You must purchase commercially licensed MySQL database software or a MySQL Enterprise subscription in order&nbsp;<br />
+<br />
+to use the DataDirect Connect for ODBC for MySQL Enterprise driver with MySQL software.<br />
+KeyStore=<br />
+KeyStorePassword=<br />
+LoadBalanceTimeout=0<br />
+LoadBalancing=0<br />
+LogonID=root<br />
+LoginTimeout=15<br />
+MaxPoolSize=100<br />
+MinPoolSize=0<br />
+Password=123456<br />
+Pooling=0<br />
+PortNumber=3306<br />
+QueryTimeout=0<br />
+ReportCodepageConversionErrors=0<br />
+TreatBinaryAsChar=0<br />
+TrustStore=<br />
+TrustStorePassword=<br />
+ValidateServerCertificate=1<br />
+<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

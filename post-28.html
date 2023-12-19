@@ -1,0 +1,138 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>PowerExchange 9.5.0 配置文件参考 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>PowerExchange 9.5.0 配置文件参考</h1>
+
+	<div class="text"><p>
+	<strong>1:启用Oracle数据库归档</strong>
+</p>
+<pre>ALTER SYSTEM SET log_archive_dest_1 = 'location=/u01/oracle/Desktop/archivelog' SCOPE=SPFILE;
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+ALTER DATABASE ARCHIVELOG;
+ALTER DATABASE OPEN;
+SHUTDOWN IMMEDIATE;
+STARTUP;
+</pre>
+<p>
+	<strong>2: dbmover.cfg</strong> 
+</p>
+<pre>/********************************************************************/
+/* &nbsp;PowerExchange Configuration File
+/********************************************************************/
+LISTENER=(node1,TCPIP,2480,262144,262144,262144,262144)
+NODE=(local,TCPIP,127.0.0.1,2480)
+NODE=(node1,TCPIP,127.0.0.1,2480,262144,262144,262144,262144)
+NODE=(default,TCPIP,x,2480)
+APPBUFSIZE=256000
+COLON=:
+CONSOLE_TRACE=N
+DECPOINT=.
+DEFAULTCHAR=*
+DEFAULTDATE=19800101
+MAXTASKS=30
+MSGPREFIX=PWX
+NEGSIGN=-
+PIPE=|
+POLLTIME=1000
+PRE861_COMPAT=N
+EXT_CP_SUPPT=Y
+</pre>
+<pre>/*监听配置MAP存放的位置*/
+CAPT_PATH=C:\Informatica\PowerExchange9.5.1\capture
+CAPT_XTRA=C:\Informatica\PowerExchange9.5.1\capture\xtramaps
+LOGPATH=C:\Informatica\PowerExchange9.5.1\capture\logs
+/*标记名，oracle实例名*/
+ORACLEID=(ETLNODE,orcl,orcl,orcl) &nbsp;&nbsp;
+CAPI_CONNECTION=(NAME=CAPIEDP,TYPE=(UOWC,CAPINAME=CAPIORAD,RSTRADV=60))
+CAPI_CONNECTION=(NAME=CAPIORAD,TYPE=(ORCL,ARRAYSIZE=1000,SELRETRY=0,ORACOLL=ETLNODE))
+CAPI_CONNECTION=(NAME=CAPXSYNC,DLLTRACE=CPX,TYPE=(CAPX,DFLTINST=ETLNODE,FILEWAIT=60,RSTRADV=600))</pre>
+<p>
+	<strong>3:pwxccl.cfg</strong> 
+</p>
+<pre>/* Name for PWXCMD control
+/*CONDENSENAME=PWXCCL1
+DBID=ETLNODE&nbsp;
+DB_TYPE=ORA
+CAPTURE_NODE_UID=SCOTT
+/*CAPTURE_NODE_EPWD=encrypted_password
+CAPTURE_NODE_PWD=123456
+
+PROMPT=Y
+EXT_CAPT_MASK=C:\Informatica\PowerExchange9.5.1\capture\condenseO&nbsp;
+CHKPT_NUM=3&nbsp;
+CHKPT_BASENAME=C:\Informatica\PowerExchange9.5.1\capture\condenseO.chkpt&nbsp;
+COND_CDCT_RET_P=50&nbsp;
+LOGGER_DELETES_EXPIRED_CDCT_RECORDS=Y
+
+/* 0 = continuous, 1 = Stop at end-of-log (batch)
+COLL_END_LOG=0&nbsp;
+/* Number of minutes to wait between CAPI read cycles in seconds
+NO_DATA_WAIT=0
+/* Number of seconds to wait at the end-of-log for more change data
+NO_DATA_WAIT2=10
+/* Number of seconds before flushing, or writing, data to the current log file on disk
+/* -1 = No flush, 0 = flush every record, 1 to N flush every N seconds
+FILE_FLUSH_VAL=5
+/* minimum number of FILE_SWITCH_CRIT units after new CDCT source entry (normal,coldstart)
+/*FILE_SWITCH_MIN=(0,0)
+FILE_SWITCH_CRIT=M&nbsp;
+FILE_SWITCH_VAL=3
+
+CAPT_IMAGE=AI&nbsp;
+SEQUENCE_TOKEN=00
+RESTART_TOKEN=00
+</pre>
+<p>
+	<strong>4:启动服务</strong> 
+</p>
+<pre>dtllst node1
+pwxccl
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

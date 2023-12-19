@@ -1,0 +1,164 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Kafka集群环境搭建及使用教程 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Kafka集群环境搭建及使用教程</h1>
+
+	<div class="text"><p>
+<br />
+wget https://mirrors.tuna.tsinghua.edu.cn/apache/kafka/2.7.0/kafka_2.13-2.7.0.tgz<br />
+<br />
+tar -zxvf kafka_2.13-2.7.0.tgz&nbsp;<br />
+<br />
+/root/kafka_2.13-2.7.0/k_data<br />
+/root/kafka_2.13-2.7.0/zk_data<br />
+/root/kafka_2.13-2.7.0/logs<br />
+<br />
+vi /root/kafka_2.13-2.7.0/config/zookeeper.properties&nbsp;<br />
+dataDir=/root/kafka_2.13-2.7.0/zk_data<br />
+clientPort=2181<br />
+maxClientCnxns=2000<br />
+initLimit=5<br />
+syncLimit=2<br />
+server.1=192.168.172.137:2888:3888<br />
+server.2=192.168.172.138:2888:3888<br />
+server.3=192.168.172.139:2888:3888<br />
+<br />
+<br />
+echo 1 &gt; /root/kafka_2.13-2.7.0/zk_data/myid<br />
+echo 2 &gt; /root/kafka_2.13-2.7.0/zk_data/myid<br />
+echo 3 &gt; /root/kafka_2.13-2.7.0/zk_data/myid<br />
+<br />
+nohup ./bin/zookeeper-server-start.sh config/zookeeper.properties &gt;logs/zookeeper.log 2&gt;1 &amp;<br />
+<br />
+<br />
+vi /root/kafka_2.13-2.7.0/config/server.properties&nbsp;<br />
+broker.id=1<br />
+listeners=PLAINTEXT://192.168.172.138:9092<br />
+advertised.listeners=PLAINTEXT://192.168.172.138:9092<br />
+log.dirs=/root/kafka_2.13-2.7.0/k_data<br />
+zookeeper.connect==192.168.172.137:2181,192.168.172.138:2181,192.168.172.139:2181<br />
+<br />
+nohup ./bin/kafka-server-start.sh config/server.properties &gt;logs/kafka.log 2&gt;1 &amp;<br />
+<br />
+./bin/kafka-topics.sh --list --zookeeper 192.168.172.137:2181,192.168.172.138:2181,192.168.172.139:2181<br />
+<br />
+./bin/kafka-topics.sh --create --zookeeper 192.168.172.137:2181,192.168.172.138:2181,192.168.172.139:2181 --replication-factor 1 --partitions 1 --topic test<br />
+<br />
+./bin/kafka-console-consumer.sh --bootstrap-server 192.168.172.137:9092,192.168.172.138:9092,192.168.172.139:9092 --from-beginning --topic test<br />
+<br />
+./bin/kafka-console-producer.sh --broker-list 192.168.172.137:9092,192.168.172.138:9092,192.168.172.139:9092 --topic test<br />
+<br />
+./bin/kafka-console-producer.sh --broker-list 192.168.172.137:9092,192.168.172.138:9092,192.168.172.139:9092 --topic test --key-deserializer key999<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+import org.apache.kafka.clients.producer.KafkaProducer;<br />
+import org.apache.kafka.clients.producer.ProducerRecord;<br />
+import org.apache.kafka.common.serialization.StringSerializer;<br />
+<br />
+import java.util.Properties;<br />
+<br />
+public class ProducerTest {<br />
+&nbsp; &nbsp; public static void main(String[] args) {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //配置信息<br />
+&nbsp; &nbsp; &nbsp; &nbsp; Properties props = new Properties();<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //kafka服务器地址<br />
+&nbsp; &nbsp; &nbsp; &nbsp; props.put("bootstrap.servers", "192.168.172.137:9092,192.168.172.138:9092,192.168.172.139:9092");<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //设置数据key和value的序列化处理类<br />
+&nbsp; &nbsp; &nbsp; &nbsp; props.put("key.serializer", StringSerializer.class);<br />
+&nbsp; &nbsp; &nbsp; &nbsp; props.put("value.serializer", StringSerializer.class);<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //创建生产者实例<br />
+&nbsp; &nbsp; &nbsp; &nbsp; KafkaProducer&lt;String,String&gt; producer = new KafkaProducer&lt;&gt;(props);<br />
+&nbsp; &nbsp; &nbsp; &nbsp; ProducerRecord record = new ProducerRecord&lt;String, String&gt;("test","key3","userName3");<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //发送记录<br />
+&nbsp; &nbsp; &nbsp; &nbsp; producer.send(record);<br />
+&nbsp; &nbsp; &nbsp; &nbsp; producer.close();<br />
+&nbsp; &nbsp; }<br />
+}<br />
+<br />
+<br />
+<br />
+<br />
+import org.apache.kafka.clients.consumer.ConsumerRecord;<br />
+import org.apache.kafka.clients.consumer.ConsumerRecords;<br />
+import org.apache.kafka.clients.consumer.KafkaConsumer;<br />
+import org.apache.kafka.common.serialization.StringDeserializer;<br />
+<br />
+import java.time.Duration;<br />
+import java.util.Arrays;<br />
+import java.util.Properties;<br />
+<br />
+public class ConsumerTest {<br />
+&nbsp; &nbsp; public static void main(String[] args) {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //配置信息<br />
+&nbsp; &nbsp; &nbsp; &nbsp; Properties props = new Properties();<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //kafka服务器地址<br />
+&nbsp; &nbsp; &nbsp; &nbsp; props.put("bootstrap.servers", "192.168.172.137:9092,192.168.172.138:9092,192.168.172.139:9092");<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //必须指定消费者组<br />
+&nbsp; &nbsp; &nbsp; &nbsp; props.put("group.id", "test");<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //设置数据key和value的序列化处理类<br />
+&nbsp; &nbsp; &nbsp; &nbsp; props.put("key.deserializer", StringDeserializer.class);<br />
+&nbsp; &nbsp; &nbsp; &nbsp; props.put("value.deserializer", StringDeserializer.class);<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //创建消息者实例<br />
+&nbsp; &nbsp; &nbsp; &nbsp; KafkaConsumer&lt;String,String&gt; consumer = new KafkaConsumer&lt;&gt;(props);<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //订阅topic1的消息<br />
+&nbsp; &nbsp; &nbsp; &nbsp; consumer.subscribe(Arrays.asList("test"));<br />
+&nbsp; &nbsp; &nbsp; &nbsp; //到服务器中读取记录<br />
+&nbsp; &nbsp; &nbsp; &nbsp; while (true){<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ConsumerRecords&lt;String,String&gt; records = consumer.poll(Duration.ofMillis(100));<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; for(ConsumerRecord&lt;String,String&gt; record : records){<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; System.out.println("key:" + record.key() + "" + ",value:" + record.value());<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }<br />
+&nbsp; &nbsp; &nbsp; &nbsp; }<br />
+&nbsp; &nbsp; }<br />
+}
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

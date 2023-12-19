@@ -1,0 +1,63 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>修改Oracle数据库的最大连接数 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>修改Oracle数据库的最大连接数</h1>
+
+	<div class="text"><strong>(1)用sys登录sqlplus:</strong><br />
+#sqlplus / as sysdba<br />
+<strong>(2) 查看最大连接数：&nbsp;</strong><br />
+<span style="white-space:normal;">sqlplus&gt;</span>select value from V$parameter where name='processes';<br />
+<strong>(3)查看当前连接数：&nbsp;</strong><br />
+<span style="white-space:normal;">sqlplus&gt;</span>select count (*) from V$process;<br />
+<strong>(4)把最大连接数改成300：</strong><br />
+<span style="white-space:normal;">sqlplus&gt;</span>alter system set processes=300 scope=spfile;<br />
+<strong>(5)重启数据库:</strong><br />
+sqlplus&gt;shutdown immediate;<br />
+sqlplus&gt;startup;<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

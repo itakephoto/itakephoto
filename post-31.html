@@ -1,0 +1,96 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>CentOS7.4安装python3.6.5 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>CentOS7.4安装python3.6.5</h1>
+
+	<div class="text">CentOS7.4默认安装的python为2.7版本，想更新成最新的3.6.5版本<br />
+<strong>（1）升级安装系统包</strong><br />
+#&gt; yum install gcc gcc-c++<br />
+#&gt; yum install zlib-devel openssl-devel<br />
+<br />
+<strong>（2）下载Linux版的源码包,并解压</strong><br />
+https://www.python.org/ftp/python/3.6.5/Python-3.6.5.tgz<br />
+#&gt; tar -zxvf Python-3.6.5.tgz<br />
+<br />
+<strong>（3）编译安装python</strong><br />
+#&gt; cd Python-3.6.5/<br />
+<br />
+把Python3.6安装到/usr/python3.6.5目录<br />
+#&gt; ./configure --prefix=/usr/python3.6.5<br />
+#&gt; make<br />
+#&gt; make install<br />
+<br />
+将旧的python文件指向新的python文件<br />
+#&gt; rm -rf /bin/python<br />
+#&gt; rm -rf /usr/bin/python<br />
+#&gt; rm -rf /usr/bin/pip<br />
+#&gt; ln -s /usr/python3.6.5/bin/python3.6 /bin/python<br />
+#&gt; ln -s /usr/python3.6.5/bin/python3.6 /usr/bin/python<br />
+#&gt; ln -s /usr/python3.6.5/bin/pip3 /usr/bin/pip<br /><br />
+<strong>（4）更改脚本的python2依赖</strong><br />
+更改yum脚本的python依赖<br />
+# cd /usr/bin<br />
+# ls yum*<br />
+yum yum-config-manager yum-debug-restore yum-groups-manager<br />
+yum-builddep yum-debug-dump yumdownloader<br />
+更改以上文件头为<br />
+#!/usr/bin/python 改为 #!/usr/bin/python2<br />
+<br />
+修改gnome-tweak-tool配置文件<br />
+# vi /usr/bin/gnome-tweak-tool<br />
+#!/usr/bin/python 改为 #!/usr/bin/python2<br />
+<br />
+<br />
+修改urlgrabber配置文件<br />
+# vi /usr/libexec/urlgrabber-ext-down<br />
+#!/usr/bin/python 改为 #!/usr/bin/python2<br />
+<br />
+<strong>（5）查看python版本</strong><br />
+#&gt; python -V<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

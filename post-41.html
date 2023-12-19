@@ -1,0 +1,91 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Kettle使用Greenplum Bluk  Loader的问题 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Kettle使用Greenplum Bluk  Loader的问题</h1>
+
+	<div class="text"><p>
+	在kettle设置中，无论什么设置都是报错，主要原因是由于以下设置引起的，如图：
+</p>
+<p>
+	<a target="_blank" href="https://lijiahong.com/4a471535356280.png" id="ematt:13"><img src="https://lijiahong.com/4a471535356280.png" title="点击查看原图" alt="1.png" border="0" width="977" height="726" /></a> 
+</p>
+<p>
+	<a target="_blank" href="https://lijiahong.com/10fb1535356290.png" id="ematt:17"><img src="https://lijiahong.com/10fb1535356290.png" title="点击查看原图" alt="3.png" border="0" width="473" height="533" /></a>
+</p>
+<p>
+	<a target="_blank" href="https://lijiahong.com/fb5c1535356285.png" id="ematt:15"><img src="https://lijiahong.com/fb5c1535356285.png" title="点击查看原图" alt="2.png" border="0" width="474" height="569" /></a>
+</p>
+<p>
+	<br />
+</p>
+<p>
+	最后发现在gpload cfg文件中，添加 NULL_AS:'',则可以运行成功。
+</p>
+<p>
+	于是就怀疑kettle的问题，从源代码修改入手。
+</p>
+<p>
+	最后定位到源码问题点：
+</p>
+<p>
+	<a target="_blank" href="https://lijiahong.com/09dd1535357084.png" id="ematt:19"><img src="https://lijiahong.com/09dd1535357084.png" title="点击查看原图" alt="4.png" border="0" width="1033" height="204" /></a>
+</p>
+<p>
+	修改成
+</p>
+<p>
+	<a target="_blank" href="https://lijiahong.com/82661535357088.png" id="ematt:21"><img src="https://lijiahong.com/82661535357088.png" title="点击查看原图" alt="5.png" border="0" width="1005" height="124" /></a>
+</p>
+<p>
+	最后重新编译，覆盖到：pdi-ce-8.1.0.0-365\data-integration\plugins\kettle-gpload-plugin\kettle-gpload-plugin-core-8.1.0.0-365.jar
+</p>
+<p>
+	最近居然成功运行了。（暂时按这种方式吧，有空再研究该控件）
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

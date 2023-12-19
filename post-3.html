@@ -1,0 +1,84 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Linux安装JDK - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Linux安装JDK</h1>
+
+	<div class="text"><strong>1）把安装文件文件保存在/usr/java/下 ,并切换到root用户</strong>&nbsp;<br />
+#&gt; mkdir /usr/java <br />
+#&gt; cp jdk-6u22-linux-i586.bin /usr/java/ <br />
+#&gt; su - root <br />
+#&gt; 输入root密码<br />
+<br />
+<strong>2）添加可执行的权限</strong><br />
+#&gt; chmod 755 jdk-6u22-linux-i586.bin 或 chmod a+x jdk-6u22-linu <br />
+<br />
+<strong>3) 安装jdk1.6</strong><br />
+#&gt; ./jdk-6u22-linux-i586.bin #(大约9页 License) say yes to install jdk<br />
+完成后 /usr/java目录下会新建一个名“jdk1.6.0_22”的目录，至此已经安装好了新的jdk<br />
+<br />
+<strong>4) 配置jdk1.6.0_22环境变量</strong><br />
+查看 确认新安装的jdk1.6.0_22 的目录为 /usr/java/default<br />
+配置jdk1.6.0_22环境变量<br />
+#&gt; vi /etc/profile<br />
+export JAVA_HOME=/usr/java/default<br />
+export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib<br />
+export PATH=$JAVA_HOME/lib:$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH:$HOME/bin:$PATH<br />
+export JAVA_TOOLS=$JAVA_HOME/lib/tools.jar<br />
+<br />
+<strong>5) 使环境变量生效：</strong><br />
+#&gt; source /etc/profile<br />
+#&gt; java -version<br />
+<br />
+<strong>Windows安装Java环境变量设置</strong> ;<br />
+<pre>
+Classpath = .;C:\jdk1.6.0_45\lib\dt.jar;C:\jdk1.6.0_45\lib\tools.jar;
+Path      = C:\jdk1.6.0_45\bin;
+JAVA_HOME = C:\jdk1.6.0_45;
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

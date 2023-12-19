@@ -1,0 +1,227 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Sqoop-1.4.4工具import和export使用详解 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Sqoop-1.4.4工具import和export使用详解</h1>
+
+	<div class="text">Sqoop可以在HDFS/Hive和关系型数据库之间进行数据的导入导出，其中主要使用了import和export这两个工具。这两个工具非常强大，提供了很多选项帮助我们完成数据的迁移和同步。比如，下面两个潜在的需求：业务数据存放在关系数据库中，如果数据量达到一定规模后需要对其进行分析或同统计，单纯使用关系数据库可能会成为瓶颈，这时可以将数据从业务数据库数据导入（import）到Hadoop平台进行离线分析。对大规模的数据在Hadoop平台上进行分析以后，可能需要将结果同步到关系数据库中作为业务的辅助数据，这时候需要将Hadoop平台分析后的数据导出（export）到关系数据库。这里，我们介绍Sqoop完成上述基本应用场景所使用的import和export工具，通过一些简单的例子来说明这两个工具是如何做到的。<br />
+<br />
+工具通用选项import和export工具有些通用的选项，如下表所示：<br />
+<br />
+选项含义说明<br />
+--connect &lt;jdbc-uri&gt; 指定JDBC连接字符串<br />
+--connection-manager &lt;class-name&gt; 指定要使用的连接管理器类<br />
+--driver &lt;class-name&gt; 指定要使用的JDBC驱动类<br />
+--hadoop-mapred-home &lt;dir&gt; 指定$HADOOP_MAPRED_HOME路径<br />
+--help 打印用法帮助信息<br />
+--password-file 设置用于存放认证的密码信息文件的路径<br />
+-P 从控制台读取输入的密码<br />
+--password &lt;password&gt; 设置认证密码<br />
+--username &lt;username&gt; 设置认证用户名<br />
+--verbose 打印详细的运行信息<br />
+--connection-param-file &lt;filename&gt; 可选，指定存储数据库连接参数的属性文件<br />
+<br />
+<strong>数据导入工具import</strong><br />
+import工具，是将HDFS平台外部的结构化存储系统中的数据导入到Hadoop平台，便于后续分析。我们先看一下import工具的基本选项及其含义，如下表所示：<br />
+<br />
+选项含义说明<br />
+--append 将数据追加到HDFS上一个已存在的数据集上<br />
+--as-avrodatafile 将数据导入到Avro数据文件<br />
+--as-sequencefile 将数据导入到SequenceFile<br />
+--as-textfile 将数据导入到普通文本文件（默认）<br />
+--boundary-query &lt;statement&gt; 边界查询，用于创建分片（InputSplit）<br />
+--columns &lt;col,col,col…&gt; 从表中导出指定的一组列的数据<br />
+--delete-target-dir 如果指定目录存在，则先删除掉<br />
+--direct 使用直接导入模式（优化导入速度）<br />
+--direct-split-size &lt;n&gt; 分割输入stream的字节大小（在直接导入模式下）<br />
+--fetch-size &lt;n&gt; 从数据库中批量读取记录数<br />
+--inline-lob-limit &lt;n&gt; 设置内联的LOB对象的大小<br />
+-m,--num-mappers &lt;n&gt; 使用n个map任务并行导入数据<br />
+-e,--query &lt;statement&gt; 导入的查询语句<br />
+--split-by &lt;column-name&gt; 指定按照哪个列去分割数据<br />
+--table &lt;table-name&gt; 导入的源表表名<br />
+--target-dir &lt;dir&gt; 导入HDFS的目标路径<br />
+--warehouse-dir &lt;dir&gt; HDFS存放表的根路径<br />
+--where &lt;where clause&gt; 指定导出时所使用的查询条件<br />
+-z,--compress 启用压缩<br />
+--compression-codec &lt;c&gt; 指定Hadoop的codec方式（默认gzip）<br />
+--null-string &lt;null-string&gt; 果指定列为字符串类型，使用指定字符串替换值为null的该类列的值<br />
+--null-non-string &lt;null-string&gt; 如果指定列为非字符串类型，使用指定字符串替换值为null的该类列的值<br />
+下面，我们通过实例来说明，在实际中如何使用这些选项。<br />
+<br />
+将MySQL数据库中整个表数据导入到Hive表<br />
+bin/sqoop import --connect jdbc:mysql://10.95.3.49:3306/workflow --table project --username shirdrn -P --hive-import&nbsp; -- --default-character-set=utf-8<br />
+将MySQL数据库workflow中project表的数据导入到Hive表中。<br />
+<br />
+将MySQL数据库中多表JION后的数据导入到HDFS<br />
+bin/sqoop import --connect jdbc:mysql://10.95.3.49:3306/workflow --username shirdrn -P --query 'SELECT users.*, tags.tag FROM users JOIN tags ON (users.id = tags.user_id) WHERE $CONDITIONS' --split-byusers.id --target-dir /hive/tag_db/user_tags&nbsp; -- --default-character-set=utf-8<br />
+这里，使用了--query选项，不能同时与--table选项使用。而且，变量$CONDITIONS必须在WHERE语句之后，供Sqoop进程运行命令过程中使用。上面的--target-dir指向的其实就是Hive表存储的数据目录。<br />
+<br />
+将MySQL数据库中某个表的数据增量同步到Hive表<br />
+bin/sqoop job --create your-sync-job -- import --connect jdbc:mysql://10.95.3.49:3306/workflow --table project --username shirdrn -P --hive-import --incremental append --check-column id --last-value 1 -- --default-character-set=utf-8<br />
+这里，每次运行增量导入到Hive表之前，都要修改--last-value的值，否则Hive表中会出现重复记录。<br />
+<br />
+将MySQL数据库中某个表的几个字段的数据导入到Hive表<br />
+bin/sqoop import --connect jdbc:mysql://10.95.3.49:3306/workflow --username shirdrn --P --table tags --columns 'id,tag' --create-hive-table -target-dir /hive/tag_db/tags -m 1 --hive-table tags --hive-import -- --default-character-set=utf-8<br />
+我们这里将MySQL数据库workflow中tags表的id和tag字段的值导入到Hive表tag_db.tags。其中--create-hive-table选项会自动创建Hive表，--hive-import选项会将选择的指定列的数据导入到Hive表。如果在Hive中通过SHOW TABLES无法看到导入的表，可以在conf/hive-site.xml中显式修改如下配置选项：<br />
+<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp;&lt;name&gt;javax.jdo.option.ConnectionURL&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp;&lt;value&gt;jdbc:derby:;databaseName=hive_metastore_db;create=true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+然后再重新运行，就能看到了。<br />
+<br />
+使用验证配置选项<br />
+sqoop import --connect jdbc:mysql://db.foo.com/corp --table EMPLOYEES --validate --validator org.apache.sqoop.validation.RowCountValidator --validation-threshold org.apache.sqoop.validation.AbsoluteValidationThreshold --validation-failurehandler org.apache.sqoop.validation.AbortOnFailureHandler<br />
+上面这个是官方用户手册上给出的用法，我们在实际中还没用过这个，有感兴趣的可以验证尝试一下。<br />
+<br />
+<strong>数据导出工具export</strong><br />
+export工具，是将HDFS平台的数据，导出到外部的结构化存储系统中，可能会为一些应用系统提供数据支持。我们看一下export工具的基本选项及其含义，如下表所示：<br />
+<br />
+选项含义说明<br />
+--validate &lt;class-name&gt; 启用数据副本验证功能，仅支持单表拷贝，可以指定验证使用的实现类<br />
+--validation-threshold &lt;class-name&gt; 指定验证门限所使用的类<br />
+--direct 使用直接导出模式（优化速度）<br />
+--export-dir &lt;dir&gt; 导出过程中HDFS源路径<br />
+-m,--num-mappers &lt;n&gt; 使用n个map任务并行导出<br />
+--table &lt;table-name&gt; 导出的目的表名称<br />
+--call &lt;stored-proc-name&gt; 导出数据调用的指定存储过程名<br />
+--update-key &lt;col-name&gt; 更新参考的列名称，多个列名使用逗号分隔<br />
+--update-mode &lt;mode&gt; 指定更新策略，包括：updateonly（默认）、allowinsert<br />
+--input-null-string &lt;null-string&gt; 使用指定字符串，替换字符串类型值为null的列<br />
+--input-null-non-string &lt;null-string&gt; 使用指定字符串，替换非字符串类型值为null的列<br />
+--staging-table &lt;staging-table-name&gt; 在数据导出到数据库之前，数据临时存放的表名称<br />
+--clear-staging-table 清除工作区中临时存放的数据<br />
+--batch 使用批量模式导出<br />
+下面，我们通过实例来说明，在实际中如何使用这些选项。这里，我们主要结合一个实例，讲解如何将Hive中的数据导入到MySQL数据库。<br />
+首先，我们准备几个表，MySQL数据库为tag_db，里面有两个表，定义如下所示：<br />
+<br />
+CREATE TABLE tag_db.users (<br />
+&nbsp; id INT(11) NOT NULL AUTO_INCREMENT,<br />
+&nbsp; name VARCHAR(100) NOT NULL,<br />
+&nbsp; PRIMARY KEY (`id`)<br />
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;<br />
+&nbsp;<br />
+CREATE TABLE tag_db.tags (<br />
+&nbsp; id INT(11) NOT NULL AUTO_INCREMENT,<br />
+&nbsp; user_id INT NOT NULL,<br />
+&nbsp; tag VARCHAR(100) NOT NULL,<br />
+&nbsp; PRIMARY KEY (`id`)<br />
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;<br />
+这两个表中存储的是基础数据，同时对应着Hive中如下两个表：<br />
+<br />
+CREATE TABLE users (<br />
+&nbsp; id INT,<br />
+&nbsp; name STRING<br />
+);<br />
+&nbsp;<br />
+<br />
+CREATE TABLE tags (<br />
+&nbsp; id INT,<br />
+&nbsp; user_id INT,<br />
+&nbsp; tag STRING<br />
+);<br />
+<br />
+我们首先在上述MySQL的两个表中插入一些测试数据：<br />
+INSERT INTO tag_db.users(name) VALUES('jeffery');<br />
+INSERT INTO tag_db.users(name) VALUES('shirdrn');<br />
+INSERT INTO tag_db.users(name) VALUES('sulee');<br />
+INSERT INTO tag_db.tags(user_id, tag) VALUES(1, 'Music');<br />
+INSERT INTO tag_db.tags(user_id, tag) VALUES(1, 'Programming');<br />
+INSERT INTO tag_db.tags(user_id, tag) VALUES(2, 'Travel');<br />
+INSERT INTO tag_db.tags(user_id, tag) VALUES(3, 'Sport');<br />
+<br />
+然后，使用Sqoop的import工具，将MySQL两个表中的数据导入到Hive表，执行如下命令行：<br />
+bin/sqoop import --connect jdbc:mysql://10.95.3.49:3306/tag_db --table users --username shirdrn -P --hive-import -- --default-character-set=utf-8<br />
+bin/sqoop import --connect jdbc:mysql://10.95.3.49:3306/tag_db --table tags --username shirdrn -P --hive-import -- --default-character-set=utf-8<br />
+导入成功以后，再在Hive中创建一个用来存储users和tags关联后数据的表：<br />
+<br />
+CREATE TABLE user_tags (<br />
+&nbsp; id STRING,<br />
+&nbsp; name STRING,<br />
+&nbsp; tag STRING<br />
+);<br />
+<br />
+执行如下HQL语句，将关联数据插入user_tags表：<br />
+FROM users u JOIN tags t ON u.id=t.user_id INSERT INTO TABLE user_tags SELECT CONCAT(CAST(u.id AS STRING),CAST(t.id AS STRING)), u.name, t.tag;<br />
+将users.id与tags.id拼接的字符串，作为新表的唯一字段id，name是用户名，tag是标签名称。<br />
+再在MySQL中创建一个对应的user_tags表，如下所示：<br />
+<br />
+CREATE TABLE tag_db.user_tags (<br />
+&nbsp; id varchar(200) NOT NULL,<br />
+&nbsp; name varchar(100) NOT NULL,<br />
+&nbsp; tag varchar(100) NOT NULL<br />
+);<br />
+使用Sqoop的export工具，将Hive表user_tags的数据同步到MySQL表tag_db.user_tags中，执行如下命令行：<br />
+<br />
+bin/sqoop export --connect jdbc:mysql://10.95.3.49:3306/tag_db --username shirdrn --P --table user_tags --export-dir /hive/user_tags --input-fields-terminated-by '\001' -- --default-character-set=utf-8<br />
+执行导出成功后，可以在MySQL的tag_db.user_tags表中看到对应的数据。<br />
+如果在导出的时候出现类似如下的错误：<br />
+<br />
+查看源代码 打印帮助<br />
+14/02/27 17:59:06 INFO mapred.JobClient: Task Id : attempt_201402260008_0057_m_000001_0, Status : FAILED<br />
+java.io.IOException: Can't export data, please check task tracker logs<br />
+&nbsp; &nbsp; &nbsp;at org.apache.sqoop.mapreduce.TextExportMapper.map(TextExportMapper.java:112)<br />
+&nbsp; &nbsp; &nbsp;at org.apache.sqoop.mapreduce.TextExportMapper.map(TextExportMapper.java:39)<br />
+&nbsp; &nbsp; &nbsp;at org.apache.hadoop.mapreduce.Mapper.run(Mapper.java:145)<br />
+&nbsp; &nbsp; &nbsp;at org.apache.sqoop.mapreduce.AutoProgressMapper.run(AutoProgressMapper.java:64)<br />
+&nbsp; &nbsp; &nbsp;at org.apache.hadoop.mapred.MapTask.runNewMapper(MapTask.java:764)<br />
+&nbsp; &nbsp; &nbsp;at org.apache.hadoop.mapred.MapTask.run(MapTask.java:364)<br />
+&nbsp; &nbsp; &nbsp;at org.apache.hadoop.mapred.Child$4.run(Child.java:255)<br />
+&nbsp; &nbsp; &nbsp;at java.security.AccessController.doPrivileged(Native Method)<br />
+&nbsp; &nbsp; &nbsp;at javax.security.auth.Subject.doAs(Subject.java:396)<br />
+&nbsp; &nbsp; &nbsp;at org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1190)<br />
+&nbsp; &nbsp; &nbsp;at org.apache.hadoop.mapred.Child.main(Child.java:249)<br />
+Caused by: java.util.NoSuchElementException<br />
+&nbsp; &nbsp; &nbsp;at java.util.AbstractList$Itr.next(AbstractList.java:350)<br />
+&nbsp; &nbsp; &nbsp;at user_tags.__loadFromFields(user_tags.java:225)<br />
+&nbsp; &nbsp; &nbsp;at user_tags.parse(user_tags.java:174)<br />
+&nbsp; &nbsp; &nbsp;at org.apache.sqoop.mapreduce.TextExportMapper.map(TextExportMapper.java:83)<br />
+&nbsp; &nbsp; &nbsp;... 10 more<br />
+通过指定字段分隔符选项--input-fields-terminated-by，指定Hive中表字段之间使用的分隔符，供Sqoop读取解析，就不会报错了。<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

@@ -1,0 +1,81 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Greenplum导出导出表结构表数据 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Greenplum导出导出表结构表数据</h1>
+
+	<div class="text"><pre>导出表结构
+pg_dump -E UTF8 -s -v DBname -n bi_dim &gt; /1.ddl
+
+导出数据
+pg_dump -E UTF8 -a -v DBname -n bi_dim &gt; /1.data
+
+导入
+psql -U gpadmin -f /1.ddl DBname
+
+
+===========================================================================================================
+以下转自：https://blog.csdn.net/yy8093/article/details/77663726
+
+/* 导入导出,切换用户 -a 数据，-s 模式 */
+-- 导出schema
+pg_dump -U 数据库用户名 -s -n 模式名1 -n 模式名2 -n 模式名3 -n 模式名4 -n 模式名5 -n 模式名6 -f 导出的文件名 数据库名;
+pg_dump -U 数据库用户名 -s -n 模式名 -f 导出的文件名 数据库名;
+-- 导出数据
+pg_dump -U 数据库用户名 -a -n 模式名1 -n 模式名2 -n 模式名3 -f 导出的文件名 数据库名;
+pg_dump -U 数据库用户名 -a --column-inserts -n 模式名1 -n 模式名2 -f 导出的文件名 数据库名;
+-- 导出表
+pg_dump -U 数据库用户名 -a -n 模式名 -t 表明 -f 导出的文件名 数据库名;
+pg_dump -U 数据库用户名 -ad -n 模式名 -t 表名 -f 导出的文件名 数据库名;
+pg_dump -U 数据库用户名 -a --column-inserts -n 模式名 -t 表名 -f 导出的文件名 数据库名;
+-- 导入SQL
+psql -U 数据库用户名 -f 导入的文件名 dbname
+
+===========================================================================================================
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

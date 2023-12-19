@@ -1,0 +1,189 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>【转】Greenplum最全分区表操作 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>【转】Greenplum最全分区表操作</h1>
+
+	<div class="text"><div>
+	原文地址：http://blog.51cto.com/13126942/2053712
+</div>
+<br />
+<div>
+	<strong>一、Greenplum 分区原理</strong><br />
+分区表意思是将一个大表在物理上分割成几块，GPDB中的分区表和PostgreSQL中实现原理一样，都是用过表继承、约束来实现。但是与PostgreSQL也有所不同，在PostgreSQL中，一个父表，多个子表来实现分区表，需要手动向子表插入数据，如果向父表插入数据，则直接会被插入到父表中，在GPDB中，可以直接想父表插入数据，便可以根据约束直接自动向对应的子表插入数据，当分区子表不存在时，插入失败<br />
+&nbsp;<br />
+<strong>二、分区表创建</strong><br />
+2.1、范围分区（range）<br />
+根据分区字段的值范围区间来分区，每一个分区就是一个子表<br />
+eg:<br />
+create table test_partition_range<br />
+(<br />
+&nbsp;&nbsp;&nbsp; id int, <br />
+&nbsp;&nbsp;&nbsp; name varchar(64), <br />
+&nbsp;&nbsp;&nbsp; fdate varchar(64)<br />
+&nbsp;&nbsp;&nbsp; ) distributed by (id) <br />
+&nbsp;&nbsp;&nbsp; partition by range(fdate) <br />
+&nbsp;&nbsp;&nbsp; (<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; partition p1 start ('2017-01-01') inclusive end ('2017-01-31') exclusive, <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; partition p2 start ('2017-02-01') inclusive end ('2017-02-29') exclusive, <br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; default partition default_p<br />
+&nbsp;&nbsp;&nbsp; );
+</div>
+<div>
+	&nbsp;&nbsp;&nbsp; inclusive ：指定包含，例如上面的 start ('2017-01-01') inclusive 则是包含'2017-01-01'<br />
+&nbsp;&nbsp;&nbsp; exclusive ： 指定不包含， 例如上面的 end ('2017-01-31') exclusive 则是不包含'2017-01-31'<br />
+&nbsp;<br />
+2.2、快速分区（every）<br />
+根据选定的范围，跨越基数，快速分区每一个子表<br />
+eg:<br />
+create table test_partition_every_1 <br />
+(<br />
+&nbsp;&nbsp;&nbsp; id int, <br />
+&nbsp;&nbsp;&nbsp; name varchar(64), <br />
+&nbsp;&nbsp;&nbsp; fdate date<br />
+) <br />
+distributed by (id) <br />
+partition by range (fdate) <br />
+(<br />
+&nbsp;&nbsp;&nbsp; partition pn_ start ('2017-01-01'::date) end ('2017-12-31'::date) every ('1 day'::interval), <br />
+&nbsp;&nbsp;&nbsp; default partition default_p<br />
+);
+</div>
+<div>
+	every：指定跨越基数<br />
+&nbsp;<br />
+2.3、list分区（list）<br />
+根据值的分组，相同的数据归类到一组，也就一个分区中<br />
+eg:<br />
+create table test_partition_list <br />
+(<br />
+&nbsp;&nbsp;&nbsp; id int, <br />
+&nbsp;&nbsp;&nbsp; name varchar(64), <br />
+&nbsp;&nbsp;&nbsp; fdate varchar(10)<br />
+) <br />
+distributed by (id) <br />
+partition by list (fdate) <br />
+(<br />
+&nbsp;&nbsp;&nbsp; partition p1 values ('2017-01-01', '2017-01-02'), <br />
+&nbsp;&nbsp;&nbsp; partition p2 values ('2017-01-03'), <br />
+&nbsp;&nbsp;&nbsp; default partition pd<br />
+);<br />
+&nbsp;<br />
+<strong>三、分区相关操作</strong><br />
+3.1、分区split<br />
+切割普通分区：<br />
+将分区p2 在 '2017-02-20' 左右切分成两块<br />
+&nbsp;alter table test_partition_range split partition p2 at ('2017-02-20') into (partition p2, partition p3);
+</div>
+<div>
+	切割默认分区：<br />
+alter table test_partition_range split default partition start ('2017-03-01')&nbsp; end ('2017-03-31')&nbsp; into (partition p4, default partition);<br />
+&nbsp;<br />
+3.2、分区add<br />
+如果存在default partition，则不能add分区，只能split default partition<br />
+alter table test_partition_range_1 add partition p2 start ('2017-02-01') end ('2017-02-31');<br />
+&nbsp;<br />
+3.3、分区drop<br />
+彻底删除对应的分区表<br />
+alter table test_partition_range_1 DROP partition p2;<br />
+&nbsp;<br />
+3.4、分区truncate<br />
+清空分区表数据，相当于删除分区，然后再新建一个<br />
+alter table test_partition_range_1 truncate partition p1;<br />
+&nbsp;<br />
+<strong>四、子分区创建与操作</strong><br />
+4.1、子分区创建<br />
+在GPDB中，分区是可以嵌套增加的，分区下面可以有子分区<br />
+create table test_partition_range_2 <br />
+(<br />
+&nbsp;&nbsp;&nbsp; id int, <br />
+&nbsp;&nbsp;&nbsp; name varchar(64), <br />
+&nbsp;&nbsp;&nbsp; fdate varchar(10)<br />
+) <br />
+distributed by (id) <br />
+partition by range(fdate) <br />
+subpartition by list(name) <br />
+subpartition template<br />
+(<br />
+&nbsp;&nbsp;&nbsp; subpartition c1 values ('xiaoxiao'), <br />
+&nbsp;&nbsp;&nbsp; subpartition c2 values ('xiaohua')<br />
+)<br />
+(<br />
+&nbsp;&nbsp;&nbsp; partition p1 start ('2017-01-01') end ('2017-01-31')<br />
+)<br />
+上面的分区中，p1会再分两个c1/c2子分区<br />
+&nbsp;<br />
+4.2、truncate 子分区<br />
+alter table test_partition_range_2 alter partition p1 truncate partition c2;<br />
+&nbsp;<br />
+4.3、drop 子分区<br />
+alter table test_partition_range_2 alter partition p1 drop partition c2;
+</div>
+<br />
+<pre>
+create table bi_dm.dm_test(
+month_wid	integer DEFAULT 0,
+measure_code varchar(50),
+measure_value	numeric
+) distributed by(month_wid,measure_code)
+partition by list (month_wid) 
+subpartition by list(measure_code) 
+subpartition template
+(
+    subpartition m1 values ('I0019'), 
+    subpartition m2 values ('I0018')
+)
+(
+partition p201801 values (201801), 
+partition p201802 values (201802),
+partition p201803 values (201803)
+);
+ALTER table bi_dm.dm_test add PARTITION  p201804 values(201804);
+ALTER table bi_dm.dm_test alter partition  p201804 add partition m3 values('I0017');
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

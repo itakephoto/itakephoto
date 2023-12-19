@@ -1,0 +1,114 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>【转】greenplum 常用SQL - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>【转】greenplum 常用SQL</h1>
+
+	<div class="text"><pre>原文地址：https://blog.csdn.net/rgb_rgb/article/details/8025473
+
+创建GP表空间
+psql gpdb
+create tablespace TBS_DW_DATA filespace gpfsdw;
+SET default_tablespace = TBS_DW_DATA;
+ 
+删除GP数据库
+gpdeletesystem -d /gpmaster/gpseg-1 -f
+ 
+查看segment配置,集群状态
+select * from gp_segment_configuration;
+ 
+文件系统
+select * from pg_filespace_entry;
+ 
+磁盘、数据库空间
+SELECT * FROM gp_toolkit.gp_disk_free ORDER BY dfsegment;
+ 
+SELECT * FROM gp_toolkit.gp_size_of_database ORDER BY sodddatname;
+ 
+日志
+SELECT * FROM gp_toolkit.__gp_log_master_ext;
+ 
+SELECT * FROM gp_toolkit.__gp_log_segment_ext;
+ 
+表描述
+/d+ <tablename>
+ 
+表分析
+VACUUM ANALYZE tablename;
+ 
+表数据分布
+SELECT gp_segment_id, count(*) FROM <table_name> GROUP BY gp_segment_id;
+ 
+表占用空间
+SELECT relname as name, sotdsize/1024/1024 as size_MB, sotdtoastsize as toast, sotdadditionalsize as other
+FROM gp_toolkit.gp_size_of_table_disk as sotd, pg_class
+WHERE sotd.sotdoid = pg_class.oid ORDER BY relname;
+ 
+索引占用空间
+SELECT soisize/1024/1024 as size_MB, relname as indexname
+FROM pg_class, gp_toolkit.gp_size_of_index
+WHERE pg_class.oid = gp_size_of_index.soioid
+AND pg_class.relkind='i';
+ 
+OBJECT的操作统计
+SELECT schemaname as schema, objname as table, usename as role, actionname as action, subtype as type, statime as time
+FROM pg_stat_operations
+WHERE objname = '<name>';
+ 
+锁
+SELECT locktype, database, c.relname, l.relation, l.transactionid, l.transaction, l.pid, l.mode, l.granted, a.current_query
+FROM pg_locks l, pg_class c, pg_stat_activity a
+WHERE l.relation=c.oid
+AND l.pid=a.procpid
+ORDER BY c.relname;
+ 
+队列
+SELECT * FROM pg_resqueue_status;
+ 
+</name></table_name></tablename></pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

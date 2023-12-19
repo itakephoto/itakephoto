@@ -1,0 +1,114 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>阿里云上CentOS的安装VNC图形访问 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>阿里云上CentOS的安装VNC图形访问</h1>
+
+	<div class="text"><p>
+	1：安装gnome
+</p>
+<p>
+	#yum groupinstall -y "X Window System"<br />
+#yum groupinstall -y "Desktop"<br />
+#yum groupinstall -y "Chinese Support"
+</p>
+<p>
+	2：安装和配置vncserver
+</p>
+<p>
+	#yum install -y tigervnc-server
+</p>
+<p>
+	#chkconfig --level 345 vncserver on
+</p>
+<p>
+	#vncserver<br />
+You will require a password to access your desktop.<br />
+Password:<br />
+Verify:
+</p>
+<p>
+	<br />
+修改 /root/.vnc/xstartup文件，把最后的 twm &amp; 删掉 加上 gnome-session &amp;。<br />
+修改/etc/sysconfig/vncservers 文件添加以下内容<br />
+<br />
+VNCSERVERS="1:root"<br />
+# 桌面号:用户 &nbsp; &nbsp;监听 590* 端口<br />
+VNCSERVERARGS[1]="-geometry 1200x800"<br />
+<br />
+配置完成后，就是需要允许我们的root用户访问图形界面了，同时生成一个新的machine-id<br />
+<br />
+#sed -i 's/.*!= root.*/#&amp;/' /etc/pam.d/gdm&nbsp;<br />
+#dbus-uuidgen &gt;/var/lib/dbus/machine-id<br />
+<br />
+把防火墙都关掉了。<br />
+# service iptables stop&nbsp;<br />
+# chkconfig iptables off
+</p>
+<p>
+	3：下载vnc客户端
+</p>
+<p>
+	http://www.realvnc.com/download/viewer/
+</p>
+<p>
+	VNC Server填写:IP:1
+</p>
+<p>
+	<br />
+</p>
+<div style="white-space:nowrap;">
+	<br />
+</div>
+<p>
+	<br />
+</p>
+<p>
+	<br />
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

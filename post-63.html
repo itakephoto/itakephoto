@@ -1,0 +1,297 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>【转】CDH 6.3.1 rpm+http安装部署 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>【转】CDH 6.3.1 rpm+http安装部署</h1>
+
+	<div class="text"><pre>
+原文地址：https://www.jianshu.com/p/33e8246c31fb
+
+一、准备工作
+1.离线部署主要分为三块:
+a.MySQL离线部署
+b.CM离线部署
+c.Parcel⽂件离线源部署
+
+2.节点规划
+
+3.下载文件
+cm6.3.1-redhat7.tar.gz 
+CDH-6.3.1-1.cdh6.3.1.p0.1470567-el7.parcel
+CDH-6.3.1-1.cdh6.3.1.p0.1470567-el7.parcel.sha1
+manifest.json 
+jdk-8u181-linux-x64.tar.gz
+mysql-5.7.26-el7-x86_64.tar.gz
+
+
+二.集群节点初始化
+1.安装三台虚拟机
+vi /etc/hosts
+192.168.174.141 cdh001
+192.168.174.142 cdh002
+192.168.174.143 cdh003
+
+2.关闭所有节点的防火墙及清空规则
+systemctl stop firewalld
+systemctl disable firewalld
+iptables -F
+
+3.关闭所有节点的selinux
+vi /etc/selinux/config
+将SELINUX=enforcing改为SELINUX=disabled
+设置后需要重启才能生效
+
+4.设置所有节点的时区⼀致及时钟同步
+设置时区
+[root@cdh001 ~]# timedatectl
+      Local time: Mon 2019-10-28 15:44:50 CST
+  Universal time: Mon 2019-10-28 07:44:50 UTC
+        RTC time: Mon 2019-10-28 07:44:44
+       Time zone: Asia/Shanghai (CST, +0800)
+     NTP enabled: n/a
+NTP synchronized: no
+ RTC in local TZ: no
+      DST active: n/a
+#查看哪些时区
+[root@cdh001 ~]# timedatectl list-timezones
+Africa/Abidjan
+Africa/Accra
+Africa/Addis_Ababa
+#所有节点设置亚洲上海时区
+[root@cdh001 ~]# timedatectl set-timezone Asia/Shanghai
+[root@cdh002 ~]# timedatectl set-timezone Asia/Shanghai
+[root@cdh003 ~]# timedatectl set-timezone Asia/Shanghai
+
+设置时间
+#所有节点安装ntp
+[root@cdh001 ~]# yum install -y ntp
+[root@cdh002 ~]# yum install -y ntp
+[root@cdh003 ~]# yum install -y ntp
+
+#选取cdh001为ntp的主节点
+[root@cdh001 ~]# vi /etc/ntp.conf
+#time
+server 0.asia.pool.ntp.org
+server 1.asia.pool.ntp.org
+server 2.asia.pool.ntp.org
+server 3.asia.pool.ntp.org
+#当外部时间不可用时，可使用本地硬件时间
+server 127.127.1.0 iburst local clock
+#允许哪些网段的机器来同步时间
+restrict 192.168.174.0 mask 255.255.255.0 nomodify notrap
+
+#开启ntpd及查看状态
+[root@cdh001 ~]# systemctl start ntpd
+[root@cdh001 ~]# systemctl status ntpd
+#验证
+[root@cdh001 ~]# ntpq -p
+     remote           refid      st t when poll reach   delay   offset  jitter
+==============================================================================
+ LOCAL(0)        .LOCL.           5 l   94   64   16    0.000    0.000   0.000
+
+#其他从节点停止禁用ntpd服务
+[root@cdh002 ~]# systemctl stop ntpd
+[root@cdh002 ~]# systemctl disable ntpd
+[root@cdh003 ~]# systemctl stop ntpd
+[root@cdh003 ~]# systemctl disable ntpd
+
+#每10分钟同步cdh001节点时间
+[root@cdh002 ~]# /usr/sbin/ntpdate cdh001
+28 Oct 16:07:41 ntpdate[9993]: adjust time server 192.168.174.141 offset 0.147138 sec
+[root@cdh003 ~]# /usr/sbin/ntpdate cdh001
+28 Oct 16:08:02 ntpdate[9993]: step time server 192.168.174.141 offset 1.997036 sec
+[root@cdh002 ~]# crontab -e
+no crontab for root - using an empty one
+*/10 * * * * /usr/sbin/ntpdate cdh001
+[root@cdh003 ~]# crontab -e
+no crontab for root - using an empty one
+*/10 * * * * /usr/sbin/ntpdate cdh001
+
+
+7.每个节点部署JDK
+mkdir -p /usr/java/
+tar -zxvf jdk-8u181-linux-x64.tar.gz -C /usr/java/
+vi /etc/profile
+export JAVA_HOME=/usr/java/jdk1.8.0_181
+export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib
+export PATH=$JAVA_HOME/lib:$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH:$HOME/bin:$PATH
+export JAVA_TOOLS=$JAVA_HOME/lib/tools.jar
+
+
+
+8.cdh002节点离线部署MySQL5.7
+tar -xvf mysql-5.7.27-1.el7.x86_64.rpm-bundle.tar
+rpm -Uivh mysql-community-*.rpm
+systemctl start mysqld.service
+systemctl status mysqld.service
+systemctl enable mysqld.service
+
+
+vi /etc/my.cnf
+plugin-load=validate_password.so
+validate-password=off
+
+cat /var/log/mysqld.log |grep password
+mysql -u root -p
+mysql> alter user root@localhost identified by '123456';
+mysql> GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '123456';
+mysql> flush privileges;
+mysql> exit
+
+9.创建CDH的元数据库和用户、 amon服务的数据库及用户
+create database cmf DEFAULT CHARACTER SET utf8;
+create database amon DEFAULT CHARACTER SET utf8;
+grant all on cmf.* TO 'cmf'@'%' IDENTIFIED BY '123456';
+grant all on amon.* TO 'amon'@'%' IDENTIFIED BY '123456';
+flush privileges;
+
+
+10.cdh002节点部署mysql jdbc jar
+[root@cdh002 mysql]# mkdir -p /usr/share/java/
+重命名不能带版本号
+cp mysql-connector-java-5.1.47.jar /usr/share/java/mysql-connector-java.jar
+
+
+
+三、CDH部署
+1.离线部署cm server及agent
+1.1.所有节点创建⽬录及解压
+mkdir /opt/cloudera-manager
+tar -xzvf cm6.3.1-redhat7.tar.gz -C /opt/cloudera-manager/
+tar -zxvf cm6.3.1-redhat7.tar.gz -C /opt/cloudera-manager/
+
+1.2.选择cdh001为cm server，不下载依赖包直接部署
+cd /opt/cloudera-manager/cm6.3.1/RPMS/x86_64/
+rpm -ivh cloudera-manager-daemons-6.3.1-1466458.el7.x86_64.rpm --nodeps --force
+rpm -ivh cloudera-manager-server-6.3.1-1466458.el7.x86_64.rpm --nodeps --force
+
+1.3.所有节点(包含cdh001)为cm agent，不下载依赖包直接部署
+cd /opt/cloudera-manager/cm6.3.1/RPMS/x86_64/
+rpm -ivh cloudera-manager-daemons-6.3.1-1466458.el7.x86_64.rpm --nodeps --force
+rpm -ivh cloudera-manager-agent-6.3.1-1466458.el7.x86_64.rpm --nodeps --force
+
+1.4.所有节点修改agent的配置，指向server的节点cdh001
+sed -i "s/server_host=localhost/server_host=cdh001/g" /etc/cloudera-scm-agent/config.ini
+
+1.5.主节点修改server的配置:
+vi /etc/cloudera-scm-server/db.properties
+com.cloudera.cmf.db.type=mysql
+com.cloudera.cmf.db.host=cdh002
+com.cloudera.cmf.db.name=cmf
+com.cloudera.cmf.db.user=cmf
+com.cloudera.cmf.db.password=123456
+com.cloudera.cmf.db.setupType=EXTERNAL
+
+
+2.cdh001节点部署离线parcel源
+2.1.安装httpd服务
+yum install httpd
+yum install openssl
+yum install mod_ssl
+
+2.2.部署离线parcel源
+mkdir -p /opt/cloudera/parcel-repo
+cp CDH-6.3.1-1.cdh6.3.1.p0.1470567-el7.parcel /opt/cloudera/parcel-repo/
+cp CDH-6.3.1-1.cdh6.3.1.p0.1470567-el7.parcel.sha /opt/cloudera/parcel-repo/
+cp manifest.json /opt/cloudera/parcel-repo/
+chown -R cloudera-scm:cloudera-scm /opt/cloudera/parcel-repo/*
+
+mkdir -p /var/www/html/cdh6_parcel
+mv CDH-6.3.1-1.cdh6.3.1.p0.1470567-el7.parcel /var/www/html/cdh6_parcel/
+mv CDH-6.3.1-1.cdh6.3.1.p0.1470567-el7.parcel.sha1 /var/www/html/cdh6_parcel/CDH-6.3.1-1.cdh6.3.1.p0.1470567-el7.parcel.sha
+mv manifest.json /var/www/html/cdh6_parcel/
+
+
+3.cdh001节点启动Server
+
+ /opt/cloudera/cm/schema/scm_prepare_database.sh mysql scm root 123456
+
+3.1.启动server
+systemctl start cloudera-scm-server
+http://cdh001/cdh6_parcel/ 查看是否可以访问
+
+查看⽇志:
+cd /var/log/cloudera-scm-server/
+tail -f cloudera-scm-server.log
+有错误就根据错误解决，没有错误，等待1min，出现7180端⼝，表明是成功的
+
+3.2.等待1min，打开 http://cdh001:7180 账号密码:admin/admin
+3.3.假如打不开，去看server的log，根据错误仔细排查错误
+
+4.所有节点启动Agent
+systemctl start cloudera-scm-agent
+
+5.接下来，全部Web界面操作
+六、常见问题
+cat /proc/sys/vm/swappiness
+#临时修改
+sysctl -w vm.swappiness=0
+永久修改
+echo "vm.swappiness=0" >> /etc/sysctl.conf
+
+已启用透明大页面压缩，可能会导致重大性能问题。
+#临时修改
+echo never > /sys/kernel/mm/transparent_hugepage/defrag
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+
+#永久修改
+vi /etc/rc.local
+echo never > /sys/kernel/mm/transparent_hugepage/defrag
+echo never > /sys/kernel/mm/transparent_hugepage/enabled
+chmod +x /etc/rc.d/rc.local
+
+Starting with CDH 6, PostgreSQL-backed Hue requires Psycopg2 version to be at least 2.5.4(可以忽略)
+yum -y install epel-release
+yum install python-pip
+pip install --upgrade psycopg2
+
+yum -y install lrzsz
+
+
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

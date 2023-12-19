@@ -1,0 +1,642 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hadoop3，zookeeper3，hive2，hbase2高可用配置 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Hadoop3，zookeeper3，hive2，hbase2高可用配置</h1>
+
+	<div class="text"><strong>1:集群规划</strong><br />
+gpm&nbsp; &nbsp;namenode,ZKFC,Resourcemanager,HMaster<br />
+gps&nbsp; &nbsp; &nbsp;namenode,ZKFC,Resourcemanager,HMaster<br />
+gp1&nbsp; &nbsp; datanode,nodemanager,zookeeper,Journalnode,hiveserve2<span style="white-space:normal;">,HRegionServer</span><br />
+gp2&nbsp; &nbsp; datanode,nodemanager,zookeeper,Journalnode<span style="white-space:normal;">,hiveserve2<span style="white-space:normal;">,HRegionServer</span></span><br />
+gp2&nbsp; &nbsp; datanode,nodemanager,zookeeper,Journalnode<span style="white-space:normal;">,hiveserve2,HRegionServer</span><br />
+<br />
+<strong>2:系统基本配置，静态IP，免密，java，防火墙，ntp等</strong><br />
+export JAVA_HOME=/usr/java/jdk1.8.0_181-cloudera<br />
+export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib<br />
+export PATH=$JAVA_HOME/lib:$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH:$HOME/bin:$PATH<br />
+export JAVA_TOOLS=$JAVA_HOME/lib/tools.jar<br />
+<br />
+<strong>3:安装zookeeper-3.5.7</strong><br />
+mkdir -p /root/zookeeper-3.5.7/data<br />
+<strong>vi /root/zookeeper-3.5.7/conf/zoo.cfg</strong><br />
+<br />
+tickTime=2000<br />
+initLimit=10<br />
+syncLimit=5<br />
+dataDir=/root/zookeeper-3.5.7/data<br />
+clientPort=2181<br />
+server.1=gp1:2888:3888<br />
+server.2=gp2:2888:3888<br />
+server.3=gp3:2888:3888<br />
+<br />
+scp -r&nbsp; /root/zookeeper-3.5.7 root@gp1:/root/<br />
+scp -r&nbsp; /root/zookeeper-3.5.7 root@gp2:/root/<br />
+scp -r&nbsp; /root/zookeeper-3.5.7 root@gp3:/root/<br />
+<br />
+gp1: echo 1 &gt; /root/zookeeper-3.5.7/data/myid<br />
+gp2: echo 2 &gt; /root/zookeeper-3.5.7/data/myid<br />
+gp3: echo 3 &gt; /root/zookeeper-3.5.7/data/myid<br />
+<br />
+gp1:/root/zookeeper-3.5.7/bin/zkServer.sh start<br />
+gp2:/root/zookeeper-3.5.7/bin/zkServer.sh start<br />
+gp3:/root/zookeeper-3.5.7/bin/zkServer.sh start<br />
+<br />
+jps:<br />
+23283 Jps<br />
+23046 QuorumPeerMain<br />
+<br />
+gp1:<br />
+/root/zookeeper-3.5.7/bin/zkCli.sh&nbsp; -server 127.0.0.1:2181<br />
+ls /<br />
+<br />
+<strong>4:安装hadoop-3.0.0</strong><br />
+mkdir -p /root/hadoop-3.0.0/data/tmp<br />
+mkdir -p /root/hadoop-3.0.0/data/journal<br />
+<br />
+<strong>vi /root/hadoop-3.0.0/etc/hadoop/hadoop-env.sh&nbsp;</strong><br />
+export JAVA_HOME=/usr/java/jdk1.8.0_181-cloudera<br />
+export HDFS_NAMENODE_USER=root<br />
+export HDFS_DATANODE_USER=root<br />
+export HDFS_SECONDARYNAMENODE_USER=root<br />
+export HDFS_ZKFC_USER=root<br />
+export HDFS_JOURNALNODE_USER=root<br />
+<br />
+<strong>vi /root/hadoop-3.0.0/etc/hadoop/yarn-env.sh</strong><br />
+export JAVA_HOME=/usr/java/jdk1.8.0_181-cloudera<br />
+export YARN_RESOURCEMANAGER_USER=root<br />
+export HADOOP_SECURE_DN_USER=yarn<br />
+export YARN_NODEMANAGER_USER=root<br />
+<br />
+<strong>vi /root/hadoop-3.0.0/etc/hadoop/mapred-env.sh&nbsp;</strong><br />
+export JAVA_HOME=/usr/java/jdk1.8.0_181-cloudera<br />
+<br />
+<strong>vi /root/hadoop-3.0.0/etc/hadoop/hdfs-site.xml</strong><br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.replication&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;3&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.permissions.enabled&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;false&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;dfs.blocksize&lt;/name&gt;<br />
+&nbsp;&lt;value&gt;134217728&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp;&lt;name&gt;dfs.ha.namenodes.ns1&lt;/name&gt;<br />
+&nbsp; &lt;value&gt;nn1,nn2&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.namenode.rpc-address.ns1.nn1&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gpm:8020&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!-- nn1的http通信地址，外部访问地址 --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.namenode.http-address.ns1.nn1&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gpm:50070&lt;/value&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.namenode.rpc-address.ns1.nn2&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gps:8020&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!-- nn2的http通信地址，外部访问地址 --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.namenode.http-address.ns1.nn2&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gps:50070&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!-- 指定NameNode的元数据在JournalNode日志上的存放位置(一般和zookeeper部署在一起) --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.namenode.shared.edits.dir&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;qjournal://gp1:8485;gp2:8485;gp3:8485/ns1&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!-- 指定JournalNode在本地磁盘存放数据的位置 --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.journalnode.edits.dir&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;/root/hadoop-3.0.0/data/journal&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--客户端通过代理访问namenode，访问文件系统，HDFS 客户端与Active 节点通信的Java 类，使用其确定Active 节点是否活跃&nbsp; --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.client.failover.proxy.provider.ns1&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--这是配置自动切换的方法，有多种使用方法，具体可以看官网，在文末会给地址，这里是远程登录杀死的方法&nbsp; --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.ha.fencing.methods&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;sshfence&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!-- 这个是使用sshfence隔离机制时才需要配置ssh免登陆 --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.ha.fencing.ssh.private-key-files&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;/root/.ssh/id_rsa&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!-- 配置sshfence隔离机制超时时间，这个属性同上，如果你是用脚本的方法切换，这个应该是可以不配置的 --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.ha.fencing.ssh.connect-timeout&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;30000&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!-- 这个是开启自动故障转移，如果你没有自动故障转移，这个可以先不配 --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.ha.automatic-failover.enabled&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+<strong>vi /root/hadoop-3.0.0/etc/hadoop/core-site.xml&nbsp;</strong><br />
+&lt;property&gt;<br />
+&nbsp;<span style="white-space:pre;"> </span>&lt;name&gt;fs.defaultFS&lt;/name&gt;<br />
+&nbsp; &nbsp; &lt;value&gt;hdfs://ns1&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;/root/hadoop-3.0.0/data/tmp&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;hadoop.http.staticuser.user&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;root&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;ha.zookeeper.quorum&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;gp1:2181,gp2:2181,gp3:2181&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &lt;name&gt;hadoop.proxyuser.root.hosts&lt;/name&gt;<br />
+&nbsp; &nbsp; &lt;value&gt;*&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &lt;name&gt;hadoop.proxyuser.root.groups&lt;/name&gt;<br />
+&nbsp; &nbsp; &lt;value&gt;*&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+<strong>vi /root/hadoop-3.0.0/etc/hadoop/yarn-site.xml</strong><br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;mapreduce_shuffle&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!-- Site specific YARN configuration properties --&gt;<br />
+&lt;!--启用resourcemanager ha--&gt;<br />
+&lt;!--是否开启RM ha，默认是开启的--&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp;&lt;name&gt;yarn.resourcemanager.ha.enabled&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &lt;value&gt;true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&nbsp; &nbsp; &lt;!--声明两台resourcemanager的地址--&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &lt;name&gt;yarn.resourcemanager.cluster-id&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp;&lt;value&gt;rmcluster&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &lt;name&gt;yarn.resourcemanager.ha.rm-ids&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &lt;value&gt;rm1,rm2&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp;&lt;name&gt;yarn.resourcemanager.hostname.rm1&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp;&lt;value&gt;gpm&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp;&lt;name&gt;yarn.resourcemanager.hostname.rm2&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp;&lt;value&gt;gps&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;!--指定zookeeper集群的地址--&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp;&lt;name&gt;yarn.resourcemanager.zk-address&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;gp1:2181,gp2:2181,gp3:2181&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--启用自动恢复，当任务进行一半，rm坏掉，就要启动自动恢复，默认是false--&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp;&lt;name&gt;yarn.resourcemanager.recovery.enabled&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp;&lt;value&gt;true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;!--指定resourcemanager的状态信息存储在zookeeper集群，默认是存放在FileSystem里面。--&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &lt;name&gt;yarn.resourcemanager.store.class&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp;&lt;value&gt;org.apache.hadoop.yarn.server.resourcemanager.recovery.ZKRMStateStore&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &lt;name&gt;yarn.resourcemanager.webapp.address.rm1&lt;/name&gt;<br />
+&nbsp; &nbsp; &lt;value&gt;gpm:8088&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &lt;name&gt;yarn.resourcemanager.webapp.address.rm2&lt;/name&gt;<br />
+&nbsp; &nbsp; &lt;value&gt;gps:8088&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+<span style="background-color:#E53333;">注意在gpm和gps分别添加</span><br />
+<span style="background-color:#E53333;"> &lt;property&gt;</span><br />
+<span style="background-color:#E53333;"> &nbsp; &nbsp;&lt;name&gt;yarn.resourcemanager.ha.id&lt;/name&gt;</span><br />
+<span style="background-color:#E53333;"> &nbsp; &nbsp;&lt;value&gt;rm1&lt;/value&gt;</span><br />
+<span style="background-color:#E53333;"> &lt;/property&gt;</span><br />
+<br />
+<span style="background-color:#E53333;"> &lt;property&gt;</span><br />
+<span style="background-color:#E53333;"> &nbsp; &nbsp;&lt;name&gt;yarn.resourcemanager.ha.id&lt;/name&gt;</span><br />
+<span style="background-color:#E53333;"> &nbsp; &nbsp;&lt;value&gt;rm2&lt;/value&gt;</span><br />
+<span style="background-color:#E53333;"> &lt;/property&gt;</span><br />
+<br />
+<strong>vi /root/hadoop-3.0.0/etc/hadoop/mapred-site.xml</strong><br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &lt;name&gt;mapreduce.framework.name&lt;/name&gt;<br />
+&nbsp; &nbsp; &lt;value&gt;yarn&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &lt;name&gt;mapreduce.jobhistory.address&lt;/name&gt;<br />
+&nbsp; &nbsp; &lt;value&gt;gpm:10020&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &lt;name&gt;mapreduce.jobhistory.webapp.address&lt;/name&gt;<br />
+&nbsp; &nbsp; &lt;value&gt;gpm:19888&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &lt;name&gt;yarn.app.mapreduce.am.env&lt;/name&gt;<br />
+&nbsp; &lt;value&gt;HADOOP_MAPRED_HOME=${HADOOP_HOME}&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &lt;name&gt;mapreduce.map.env&lt;/name&gt;<br />
+&nbsp; &lt;value&gt;HADOOP_MAPRED_HOME=${HADOOP_HOME}&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &lt;name&gt;mapreduce.reduce.env&lt;/name&gt;<br />
+&nbsp; &lt;value&gt;HADOOP_MAPRED_HOME=${HADOOP_HOME}&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+<strong>vi /root/hadoop-3.0.0/etc/hadoop/workers</strong><br />
+gp1<br />
+gp2<br />
+gp3<br />
+<br />
+scp -r /root/hadoop-3.0.0 root@gpm:/root/<br />
+scp -r /root/hadoop-3.0.0 root@gps:/root/<br />
+scp -r /root/hadoop-3.0.0 root@gp1:/root/<br />
+scp -r /root/hadoop-3.0.0 root@gp2:/root/<br />
+scp -r /root/hadoop-3.0.0 root@gp3:/root/<br />
+<br />
+启动journalnode：<br />
+gp1:/root/hadoop-3.0.0/sbin/hadoop-daemon.sh&nbsp; start journalnode<br />
+gp2:/root/hadoop-3.0.0/sbin/hadoop-daemon.sh&nbsp; start journalnode<br />
+gp3:/root/hadoop-3.0.0/sbin/hadoop-daemon.sh&nbsp; start journalnode<br />
+<br />
+在其中一台NameNode格式化zkfc<br />
+gpm:/root/hadoop-3.0.0/bin/hdfs zkfc -formatZK&nbsp;&nbsp;<br />
+<br />
+格式化主节点namenode<br />
+gpm:/root/hadoop-3.0.0/bin/hdfs namenode -format<br />
+gpm:/root/hadoop-3.0.0/bin/hdfs --daemon start namenode<br />
+<br />
+副节点同步主节点格式化<br />
+gps:/root/hadoop-3.0.0/bin/hdfs namenode -bootstrapStandby<br />
+<br />
+启动集群<br />
+/root/hadoop-3.0.0/sbin/start-all.sh<br />
+<br />
+查看是否一个active一个standby<br />
+http://192.168.142.135:50070/dfshealth.html<br />
+http://192.168.142.136:50070/dfshealth.html<br />
+http://192.168.142.135:8088/cluster<br />
+http://192.168.142.136:8088/cluster<br />
+<br />
+<strong>5:安装hive-2.3.6,安装mysql5.7</strong><br />
+wget -c http://dev.mysql.com/get/mysql57-community-release-el7-10.noarch.rpm<br />
+yum&nbsp; install mysql57-community-release-el7-10.noarch.rpm<br />
+yum&nbsp; install mysql-community-server<br />
+systemctl start&nbsp; mysqld.service<br />
+systemctl enable&nbsp; mysqld.service<br />
+grep "password" /var/log/mysqld.log<br />
+mysql -uroot -p&nbsp;<br />
+mysql&gt; set global validate_password_policy=0;<br />
+mysql&gt; set global validate_password_length=1;<br />
+mysql&gt; ALTER USER 'root'@'%' IDENTIFIED BY '123456';<br />
+mysql&gt; flush privilges;<br />
+<br />
+yum install mysql-connector-java<br />
+scp /usr/share/java/mysql-connector-java.jar root@gpm:/usr/schare/java<br />
+<br />
+mkdir -p /root/hive-2.3.6/log<br />
+<br />
+<strong>vi /root/hive-2.3.6/conf/hive-env.sh&nbsp;</strong><br />
+export HADOOP_HOME=/root/hadoop-3.0.0<br />
+export HIVE_CONF_DIR=/root/hive-2.3.6/conf<span style="white-space:pre;"> </span><br />
+<br />
+<strong>vi /root/hive-2.3.6/conf/hive-site.xml</strong><br />
+&lt;!--Hive作业的HDFS根目录位置 --&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.exec.scratchdir&lt;/name&gt;<br />
+&lt;value&gt;/user/hive/tmp&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--Hive作业的HDFS根目录创建写权限 --&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.scratch.dir.permission&lt;/name&gt;<br />
+&lt;value&gt;755&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--hdfs上hive元数据存放位置 --&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.metastore.warehouse.dir&lt;/name&gt;<br />
+&lt;value&gt;/user/hive/warehouse&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--连接数据库地址，名称 --&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;javax.jdo.option.ConnectionURL&lt;/name&gt;<br />
+&lt;value&gt;jdbc:mysql://gps:3306/hive_metastore?createDatabaseIfNotExist=true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--连接数据库驱动 --&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;javax.jdo.option.ConnectionDriverName&lt;/name&gt;<br />
+&lt;value&gt;com.mysql.jdbc.Driver&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--连接数据库用户名称 --&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;javax.jdo.option.ConnectionUserName&lt;/name&gt;<br />
+&lt;value&gt;root&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--连接数据库用户密码 --&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;javax.jdo.option.ConnectionPassword&lt;/name&gt;<br />
+&lt;value&gt;123456&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--客户端显示当前查询表的头信息 --&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.cli.print.header&lt;/name&gt;<br />
+&lt;value&gt;true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--客户端显示当前数据库名称信息 --&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.cli.print.current.db&lt;/name&gt;<br />
+&lt;value&gt;true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;!--高可用--&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.server2.support.dynamic.service.discovery&lt;/name&gt;<br />
+&lt;value&gt;true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.server2.zookeeper.namespace&lt;/name&gt;<br />
+&lt;value&gt;hiveserver2_zk&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.zookeeper.quorum&lt;/name&gt;<br />
+&lt;value&gt;gp1:2181,gp2:2181,gp3:2181&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.zookeeper.client.port&lt;/name&gt;<br />
+&lt;value&gt;2181&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.server2.thrift.port&lt;/name&gt;<br />
+&lt;value&gt;10001&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&nbsp;&lt;!--高可用，注意填写gp1,gp2,gp3--&gt;<br />
+&lt;property&gt;<br />
+&lt;name&gt;hive.server2.thrift.bind.host&lt;/name&gt;<br />
+&lt;value&gt;gp1&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+初始化mysql<br />
+cp /usr/share/java/mysql-connector-java.jar /root/apache-hive-2.3.6-bin/lib/<br />
+/root/hive-2.3.6/bin/schematool -dbType mysql -initSchema&nbsp;<br />
+<br />
+scp -r /root/hive-2.3.6 root@gp1:/root/<br />
+scp -r /root/hive-2.3.6 root@gp2:/root/<br />
+scp -r /root/hive-2.3.6 root@gp3:/root/<br />
+<br />
+启动hiveserver2<br />
+gp1:/root/hive-2.3.6/bin/hiveserver2<br />
+gp2:/root/hive-2.3.6/bin/hiveserver2<br />
+gp3:/root/hive-2.3.6/bin/hiveserver2<br />
+<br />
+java连接hivesever2<br />
+jdbc:/root/hive-2.3.6/jdbc/hive-jdbc-2.3.6-standalone.jar<br />
+<br />
+package hive;<br />
+<br />
+import java.sql.Connection;<br />
+import java.sql.DriverManager;<br />
+import java.sql.ResultSet;<br />
+import java.sql.Statement;<br />
+<br />
+public class HA {<br />
+<br />
+&nbsp; &nbsp; private static String driverName = "org.apache.hive.jdbc.HiveDriver";<br />
+&nbsp; &nbsp; private static String connctUrl = "jdbc:hive2://gp1:2181,gp2:2181,gp3:2181/default;serviceDiscoveryMode=zooKeeper;zooKeeperNamespace=hiveserver2_zk";<br />
+&nbsp; &nbsp; private static String userName = "root";<br />
+&nbsp; &nbsp; private static String password = "123456";<br />
+&nbsp; &nbsp;&nbsp;<br />
+&nbsp; &nbsp; public static void main(String[] args) throws Exception {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; Class.forName(driverName);<br />
+&nbsp; &nbsp;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; Connection con = DriverManager.getConnection(connctUrl, userName, password);<br />
+&nbsp; &nbsp; &nbsp; &nbsp; Statement stmt = con.createStatement();<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; ResultSet res = stmt.executeQuery( "select * from dual" );<br />
+&nbsp; &nbsp; &nbsp; &nbsp; while (res.next()) {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; System.out.println( res.getInt(1) +"," + res.getString(2)&nbsp; );<br />
+&nbsp; &nbsp; &nbsp; &nbsp; }&nbsp; &nbsp;&nbsp;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; stmt.close();<br />
+&nbsp; &nbsp; &nbsp; &nbsp; con.close();<br />
+&nbsp; &nbsp; }<br />
+}&nbsp;<br />
+<br />
+<br />
+<strong>6:安装hbase-2.1.0</strong><br />
+mkdir -p /root/hbase-2.1.0/data/pids<br />
+mkdir -p /root/hbase-2.1.0/logs<br />
+<br />
+<strong>vi /root/hbase-2.1.0/conf/hbase-env.sh</strong><br />
+export JAVA_HOME=/usr/java/jdk1.8.0_181-cloudera<br />
+export HADOOP_HOME=/root/hadoop-3.0.0<br />
+export HBASE_HOME=/root/hbase-2.1.0<br />
+export HBASE_CLASSPATH=/root/hadoop-3.0.0/etc/hadoop<br />
+export HBASE_LOG_DIR=/root/hbase-2.1.0/logs<br />
+export HBASE_PID_DIR=/root/hbase-2.1.0/data/pids<br />
+export HBASE_MANAGES_ZK=false<br />
+<br />
+<strong>vi&nbsp;/root/hbase-2.1.0/conf/regionservers</strong><br />
+gp1<br />
+gp2<br />
+gp3<br />
+<br />
+<strong>vi /root/hbase-2.1.0/conf/hbase-site.xml</strong><br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;hbase.rootdir&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;hdfs://ns1/hbase&lt;/value&gt;<br />
+&nbsp;&lt;/property&gt;<br />
+<br />
+&lt;!-- 分布式开关 --&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;hbase.cluster.distributed&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;!-- zookeeper集群地址 --&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &lt;name&gt;hbase.zookeeper.quorum&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &lt;value&gt;gp1,gp2,gp3&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp;&lt;name&gt;hbase.zookeeper.property.clientPort&lt;/name&gt;<br />
+&nbsp; &nbsp;&lt;value&gt;2181&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;hbase.unsafe.stream.capability.enforce&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;false&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+rm -rf /root/hbase-2.1.0/lib/client-facing-thirdparty/slf4j-log4j12-1.7.25.jar<br />
+scp -r /root/hbase-2.1.0 root@gps:/root/<br />
+scp -r /root/hbase-2.1.0 root@gp1:/root/<br />
+scp -r /root/hbase-2.1.0 root@gp2:/root/<br />
+<br />
+<p>
+	gpm:<br />
+/root/hbase-2.1.0/bin/start-hbase.sh<br />
+<br />
+gps:<br />
+/root/hbase-2.1.0/bin/hbase-daemon.sh start master<br />
+<br />
+http://gpm:16010/master-status<br />
+http://gps:16010/master-status<br />
+http://gp1:16030/rs-status<br />
+http://gp2:16030/rs-status<br />
+http://gp3:16030/rs-status<br />
+<br />
+<br />
+整合hive与hbase<br />
+<strong>vi /root/hive-2.3.6/conf/hive-site.xml</strong><br />
+&lt;!-- hbase --&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &lt;name&gt;hbase.zookeeper.quorum&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &lt;value&gt;gp1,gp2,gp3&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp;&lt;name&gt;hbase.zookeeper.property.clientPort&lt;/name&gt;<br />
+&nbsp; &nbsp;&lt;value&gt;2181&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+<br />
+<br />
+<strong>vi /root/hive-2.3.6/conf/hive-env.sh</strong><br />
+export HBASE_HOME=/root/hbase-2.1.0<br />
+<br />
+创建hive外部表<br />
+create EXTERNAL table hbase_test(id int,tid string,tname string)&nbsp;<br />
+stored by 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'&nbsp;<br />
+with serdeproperties("hbase.columns.mapping"=":key,cf1:tid,cf1:tname") tblproperties("hbase.table.name"="t_test");<br />
+<br />
+select * from hbase_test;<br />
+<br />
+JAVA读取HBASE表<br />
+&lt;dependency&gt;<br />
+&nbsp; &nbsp; <span style="white-space:pre;"> </span>&lt;groupId&gt;org.apache.hbase&lt;/groupId&gt;<br />
+&nbsp; &nbsp; <span style="white-space:pre;"> </span>&lt;artifactId&gt;hbase-client&lt;/artifactId&gt;<br />
+&nbsp; &nbsp; <span style="white-space:pre;"> </span>&lt;version&gt;2.1.0&lt;/version&gt;<br />
+&lt;/dependency&gt;<br />
+<br />
+package com.lijiahong.hbase;<br />
+<br />
+import java.util.Date;<br />
+import java.util.List;<br />
+<br />
+import org.apache.hadoop.conf.Configuration;<br />
+import org.apache.hadoop.hbase.Cell;<br />
+import org.apache.hadoop.hbase.TableName;<br />
+import org.apache.hadoop.hbase.client.Connection;<br />
+import org.apache.hadoop.hbase.client.ConnectionFactory;<br />
+import org.apache.hadoop.hbase.client.Get;<br />
+import org.apache.hadoop.hbase.client.Result;<br />
+import org.apache.hadoop.hbase.client.Table;<br />
+<br />
+public class Test {<br />
+<br />
+<span style="white-space:pre;"> </span>public static void main(String[] args) throws Exception {<br />
+<span style="white-space:pre;"> </span>System.out.println(new Date());<br />
+<span style="white-space:pre;"> </span><br />
+<span style="white-space:pre;"> </span>Configuration conf = new Configuration();<br />
+<span style="white-space:pre;"> </span>conf.set("hbase.zookeeper.quorum", "gp1,gp2,gp3");<br />
+<span style="white-space:pre;"> </span>conf.set("hbase.zookeeper.property.clientPort", "2181");<br />
+<span style="white-space:pre;"> </span>conf.set("hbase.ipc.client.socket.timeout", "5");<br />
+<span style="white-space:pre;"> </span><br />
+<span style="white-space:pre;"> </span>Connection conn = ConnectionFactory.createConnection(conf);<br />
+<span style="white-space:pre;"> </span><br />
+<span style="white-space:pre;"> </span>System.out.println("conn:"+new Date());<br />
+<span style="white-space:pre;"> </span><br />
+<span style="white-space:pre;"> </span>Table table = conn.getTable(TableName.valueOf("t_test"));<br />
+<span style="white-space:pre;"> </span><br />
+<span style="white-space:pre;"> </span>Get get = new Get("1001".getBytes());<br />
+<span style="white-space:pre;"> </span>Result r = table.get(get);<br />
+<span style="white-space:pre;"> </span>List&lt;Cell&gt; cells = r.listCells();<br />
+<span style="white-space:pre;"> </span>for(Cell c: cells) {<br />
+<span style="white-space:pre;"> </span>System.out.println(new String(c.getFamilyArray(),c.getFamilyOffset(),c.getFamilyLength()));<br />
+<span style="white-space:pre;"> </span>System.out.println(new String(c.getQualifierArray(),c.getQualifierOffset(),c.getQualifierLength()));<br />
+<span style="white-space:pre;"> </span>System.out.println(new String(c.getValueArray(),c.getValueOffset(),c.getValueLength()));<br />
+<span style="white-space:pre;"> </span>}<br />
+<span style="white-space:pre;"> </span>System.out.println(new Date());<br />
+<span style="white-space:pre;"> </span><br />
+<span style="white-space:pre;"> </span>Get get1 = new Get("1002".getBytes());<br />
+<span style="white-space:pre;"> </span>Result r1 = table.get(get1);<br />
+<span style="white-space:pre;"> </span>List&lt;Cell&gt; cells1 = r1.listCells();<br />
+<span style="white-space:pre;"> </span>for(Cell c: cells1) {<br />
+<span style="white-space:pre;"> </span>System.out.println(new String(c.getFamilyArray(),c.getFamilyOffset(),c.getFamilyLength()));<br />
+<span style="white-space:pre;"> </span>System.out.println(new String(c.getQualifierArray(),c.getQualifierOffset(),c.getQualifierLength()));<br />
+<span style="white-space:pre;"> </span>System.out.println(new String(c.getValueArray(),c.getValueOffset(),c.getValueLength()));<br />
+<span style="white-space:pre;"> </span>}<br />
+<span style="white-space:pre;"> </span><br />
+<span style="white-space:pre;"> </span>System.out.println(new Date());<br />
+<span style="white-space:pre;"> </span>conn.close();<br />
+<span style="white-space:pre;"> </span>}<br />
+<br />
+}
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

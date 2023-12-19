@@ -1,0 +1,90 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Oracle自定义字符分隔函数(split) - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Oracle自定义字符分隔函数(split)</h1>
+
+	<div class="text"><p>为了让 PL/SQL 函数返回数据的多个行，必须通过返回一个 REF CURSOR 或一个数据集合来完成。REF CURSOR 的这种情况局限于可以从查询中选择的数据，而整个集合在可以返回前，必须进行具体化。Oracle 9i 通过引入的管道化表函数纠正了后一种情况。表函数是返回整个行的集（通常作为一个集合）的函数，可以直接从 SQL 语句中进行查询，就好像它是一个真正的数据库表一样。管道化表函数与之相似，但是它像在构建时一样返回数据，而不是一次全部返回。管道化表函数更加有效，因为数据可以尽可能快地返回。管道化表函数必须返回一个集合。在函数中，PIPE ROW 语句被用来返回该集合的单个元素，该函数必须以一个空的 RETURN 语句结束，以表明它已经完成。一旦我们创建了上述函数，我们就可以使用 TABLE 操作符从 SQL 查询中调用它。管道化表函数经常被用来把数据从一种类型转化成另一种类型。
+</p>
+<br />
+<br />
+<strong>1:先建立一个类型</strong><br />
+CREATE OR REPLACE TYPE strsplit_type IS TABLE OF VARCHAR2 (4000)<br />
+<br />
+<strong>2:创建函数</strong><br />
+create or replace function strsplit(p_value varchar2,<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; p_split varchar2 := ',')<br />
+--usage: select * from table(strsplit('1,2,3,4,5'))<br />
+&nbsp;return strsplit_type<br />
+&nbsp; pipelined is<br />
+&nbsp; v_idx&nbsp; &nbsp; &nbsp; &nbsp;integer;<br />
+&nbsp; v_str&nbsp; &nbsp; &nbsp; &nbsp;varchar2(500);<br />
+&nbsp; v_strs_last varchar2(4000) := p_value;<br />
+<br />
+begin<br />
+&nbsp; loop<br />
+&nbsp; &nbsp; v_idx := instr(v_strs_last, p_split);<br />
+&nbsp; &nbsp; exit when v_idx = 0;<br />
+&nbsp; &nbsp; v_str&nbsp; &nbsp; &nbsp; &nbsp;:= substr(v_strs_last, 1, v_idx - 1);<br />
+&nbsp; &nbsp; v_strs_last := substr(v_strs_last, v_idx + 1);<br />
+&nbsp; &nbsp; pipe row(v_str);<br />
+&nbsp; end loop;<br />
+&nbsp; pipe row(v_strs_last);<br />
+&nbsp; return;<br />
+<br />
+end strsplit;<br />
+<br />
+<strong>3:测试</strong><br />
+usage: select * from table(strsplit('1,2,3,4,5'))<br />
+<br />
+1&nbsp; &nbsp; &nbsp; &nbsp;1<br />
+2&nbsp; &nbsp; &nbsp; &nbsp;2<br />
+3&nbsp; &nbsp; &nbsp; &nbsp;3<br />
+4&nbsp; &nbsp; &nbsp; &nbsp;4<br />
+5&nbsp; &nbsp; &nbsp; &nbsp;5<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

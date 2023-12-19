@@ -1,0 +1,72 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>阿里云上CentOS7的Tomcat8.5启动https - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>阿里云上CentOS7的Tomcat8.5启动https</h1>
+
+	<div class="text"><pre>1:申请阿里云的免费https
+
+2：修改tomcat/conf/server.xml
+
+&nbsp; &nbsp; &lt;Connector port="8443" protocol="org.apache.coyote.http11.Http11NioProtocol"
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;maxThreads="150" SSLEnabled="true"&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;SSLHostConfig&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;Certificate certificateKeystoreFile="/usr/tomcat/https/2492434_lijiahong.cn.pfx"
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; certificateKeystoreType="PKCS12"
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; certificateKeystorePassword="bYUh3vps"
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; certificateKeyAlias="alias"/&gt;
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;/SSLHostConfig&gt;
+&nbsp; &nbsp; &lt;/Connector&gt;
+
+PS:如何查看alias
+keytool -list -v -keystore pfx文件 -storepass 密码
+<div>
+	
+</div>
+<span style="font-family:'sans serif, tahoma, verdana, helvetica';"><span style="white-space:nowrap;"> </span></span></pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

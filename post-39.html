@@ -1,0 +1,496 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>【转】Greenplum 4.3 For CentOS 6.5 安装指南 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>【转】Greenplum 4.3 For CentOS 6.5 安装指南</h1>
+
+	<div class="text"><p>
+	转自:https://www.linuxidc.com/Linux/2016-11/136896.htm<br />
+<br />
+1.greenplum数据库安装前期准备工作<br />
+1.1 安装Linux<br />
+内存：最小1GB，推荐2GB或以上。<br />
+交换空间: 内存大小是1-2GB时，交换空间是内存的1.5倍，内存大小2-16GB时，交换空间等于内存大小，内存大小16G以上时，交换空间为16GB。<br />
+需要选择以下组件:GNOME桌面、编辑器、开发工具、开发库等，具体参照Linux标准文档。<br />
+使用安装光盘安装CentOS-6.5-x86_64-bin<br />
+Greenplum 数据库版本 4.3.9.1<br />
+1.2 配置系统信息，做安装Greenplum的准备工作<br />
+1.2.1&nbsp; Greenplum集群介绍<br />
+这里使用1个master，3个segment的集群，ip为：<br />
+<br />
+196.168.0.56<br />
+196.168.0.57<br />
+196.168.0.58<br />
+196.168.0.59<br />
+其中196.168.0.56为master，其余为segment。<br />
+<br />
+1.2.2&nbsp; 修改/etc/hosts文件（所有的机器都要修改）<br />
+这里主要是为之后Greenplum能够在各个节点之间相互通信做准备，添加如下：<br />
+<br />
+格式为：主机ip地址 主机名<br />
+<br />
+[root@mdw ~]# vi /etc/hosts<br />
+<br />
+192.168.0.56 mdw<br />
+192.168.0.57 sdw1<br />
+192.168.0.58 sdw2<br />
+192.168.0.59 sdw3<br />
+注意：一定要按照这个格式写，参数代表的含义，上面已经做出说明。<br />
+<br />
+配置了这个文件之后，需要继续修改hostname，即修改/etc/sysconfig/network这个文件。<br />
+<br />
+如下（所有机器都要修改）：<br />
+<br />
+[root@mdw ~]# vi /etc/sysconfig/network<br />
+<br />
+NETWORKING=yes<br />
+HOSTNAME=mdw<br />
+注意：这里修改hostname，需要重启之后方可生效，如需立即生效，需使用hostname命令。<br />
+<br />
+[root@mdw ~]# hostname mdw<br />
+这里的HOSTNAME一定要与/etc/hosts中的主机名一致，最终可以使用ping命令测试是否配置好了：<br />
+<br />
+[root@mdw ~]# ping sdw1<br />
+<br />
+PING sdw1 (192.168.0.57) 56(84) bytes of data.<br />
+64 bytes from sdw1 (192.168.0.57): icmp_seq=1 ttl=64 time=1.14 ms<br />
+64 bytes from sdw1 (192.168.0.57): icmp_seq=2 ttl=64 time=0.726 ms<br />
+64 bytes from sdw1 (192.168.0.57): icmp_seq=3 ttl=64 time=0.714 ms<br />
+<br />
+--- sdw1 ping statistics ---<br />
+3 packets transmitted, 3 received, 0% packet loss, time 2279ms<br />
+rtt min/avg/max/mdev = 0.714/0.862/1.148/0.204 ms<br />
+[root@mdw ~]# ping sdw2<br />
+PING sdw2 (192.168.0.58) 56(84) bytes of data.<br />
+64 bytes from sdw2 (192.168.0.58): icmp_seq=1 ttl=64 time=0.940 ms<br />
+<br />
+--- sdw2 ping statistics ---<br />
+1 packets transmitted, 1 received, 0% packet loss, time 971ms<br />
+rtt min/avg/max/mdev = 0.940/0.940/0.940/0.000 ms<br />
+<br />
+[root@mdw ~]# ping sdw3<br />
+PING sdw3 (192.168.0.59) 56(84) bytes of data.<br />
+64 bytes from sdw3 (192.168.0.59): icmp_seq=1 ttl=64 time=1.62 ms<br />
+64 bytes from sdw3 (192.168.0.59): icmp_seq=2 ttl=64 time=0.669 ms<br />
+<br />
+--- sdw3 ping statistics ---<br />
+2 packets transmitted, 2 received, 0% packet loss, time 1146ms<br />
+rtt min/avg/max/mdev = 0.669/1.148/1.627/0.479 ms<br />
+一定要使用主机名来测试，使用ip地址测试无效。<br />
+<br />
+注意：修改了/etc/sysconfig/network 后，可以将/home/gpadmin/.gphostcache 删除掉，因为如果在修改network文件之前执行过gpssh-exkeys，可能会在gphostcache文件中生成主机名和hostlist配置中的名字形成对应关系，而greenplum之后不会再修改这个文件。<br />
+<br />
+1.2.3&nbsp; 创建用户和用户组（所有机器都要创建）<br />
+[root@mdw ~]# groupadd -g 530 gpadmin<br />
+[root@mdw ~]# useradd -g 530 -u530 -m -d /home/gpadmin -s /bin/bash gpadmin<br />
+[root@mdw ~]# passwd gpadmin<br />
+<br />
+Changing password for user gpadmin.<br />
+New password:<br />
+Retype new password:<br />
+passwd: all authentication tokens updated successfully.<br />
+1.2.4&nbsp; 修改系统内核（所有的机器都要修改）<br />
+[root@mdw ~]# vi /etc/sysctl.conf<br />
+<br />
+kernel.shmmax = 500000000<br />
+kernel.shmmni = 4096<br />
+kernel.shmall = 4000000000<br />
+kernel.sem = 250 512000 100 2048<br />
+kernel.sysrq = 1<br />
+kernel.core_uses_pid = 1<br />
+kernel.msgmnb = 65536<br />
+kernel.msgmax = 65536<br />
+kernel.msgmni = 2048<br />
+net.ipv4.tcp_syncookies = 1<br />
+net.ipv4.ip_forward = 0<br />
+net.ipv4.conf.default.accept_source_route = 0<br />
+net.ipv4.tcp_tw_recycle = 1<br />
+net.ipv4.tcp_max_syn_backlog = 4096<br />
+net.ipv4.conf.all.arp_filter = 1<br />
+net.ipv4.ip_local_port_range = 1025 65535<br />
+net.core.netdev_max_backlog = 10000<br />
+net.core.rmem_max = 2097152<br />
+net.core.wmem_max = 2097152<br />
+vm.overcommit_memory = 2<br />
+执行以下命令使参数生效:<br />
+<br />
+[root@dw-greenplum-1~]# sysctl -p<br />
+注意：每台机器都要修改，不然就会初始化不成功。<br />
+<br />
+1.2.5&nbsp; 修改文件（每台机器都要修改）：<br />
+[root@mdw ~]# vi /etc/security/limits.conf<br />
+# End of file<br />
+* soft nofile 65536<br />
+* hard nofile 65536<br />
+* soft nproc 131072<br />
+* hard nproc 131072<br />
+在这个文件末尾，添加上面四行就可以了。<br />
+<br />
+1.2.6&nbsp; 关闭防火墙（每台机器都要）<br />
+[root@mdw ~]# service iptables stop<br />
+<br />
+（或者开放5432端口，该端口之后会用到）<br />
+[root@mdw ~]# /sbin/iptables -I INPUT -p tcp --dport 80 -j ACCEPT<br />
+[root@mdw ~]# /etc/rc.d/init.d/iptables save<br />
+除此之外，还需关闭SELINUX<br />
+<br />
+[root@mdw selinux]# vi /etc/selinux/config<br />
+<br />
+# This file controls the state of SELinux on the system.<br />
+# SELINUX= can take one of these three values:<br />
+#&nbsp; &nbsp; &nbsp;enforcing - SELinux security policy is enforced.<br />
+#&nbsp; &nbsp; &nbsp;permissive - SELinux prints warnings instead of enforcing.<br />
+#&nbsp; &nbsp; &nbsp;disabled - No SELinux policy is loaded.<br />
+SELINUX=disabled<br />
+<br />
+# SELINUXTYPE= can take one of these two values:<br />
+#&nbsp; &nbsp; &nbsp;targeted - Targeted processes are protected,<br />
+#&nbsp; &nbsp; &nbsp;mls - Multi Level Security protection.<br />
+SELINUXTYPE=targeted<br />
+好了现在准备工作已经做好了，可以开始安装Greenplum了。<br />
+<br />
+2 安装Greenplum<br />
+2.1&nbsp; 创建安装文件目录（每台机器都需要创建）<br />
+[root@mdw ~]# mkdir /opt/greenplum<br />
+[root@mdw ~]# chown -R gpadmin:gpadmin /opt/greenplum<br />
+之后安装文件，就放在这个目录下面<br />
+<br />
+&nbsp;<br />
+<br />
+2.2&nbsp; 下载安装包<br />
+官网 https://network.pivotal.io/products/pivotal-gpdb<br />
+<br />
+注意：下载安装包之前，需要在官网注册账号，方可下载。<br />
+<br />
+(1)选择最新发布版本<br />
+<br />
+&nbsp;<br />
+<br />
+(2)选择最后一个 4.3.9.1 Database Server<br />
+<br />
+&nbsp;<br />
+<br />
+(3)选择第二个 Greenplum Database 4.3.9.1 for Red Hat Enterprise Linux 5,6 and 7<br />
+<br />
+&nbsp;<br />
+<br />
+2.3&nbsp; master上安装Greenplum（只需master即可）<br />
+上传Greenplum的安装文件greenplum-db-4.3.9.1-build-1-RHEL5-x86_64.zip并解压缩。<br />
+<br />
+# unzip ./greenplum-db-4.3.9.1-build-1-RHEL5-x86_64.zip<br />
+在root用户下，将下载的文件放在CentOS系统中自己能找到的位置即可，给该文件赋予可执行权限，之后执行该文件，即开始安装<br />
+<br />
+# chmod +x greenplum-db-4.3.9.1-build-1-RHEL5-x86_64.bin<br />
+# ./greenplum-db-4.3.9.1-build-1-RHEL5-x86_64.bin<br />
+期间需要修改默认安装目录，输入 /opt/greenplum/greenplum-db-4.3.9.1之后即可安装成功，此时master上的Greenplum安装成功了。<br />
+<br />
+但是之前我们都是以root身份安装的，所以要将安装目录下的文件的所有者，都修改为gpadmin。<br />
+<br />
+[root@mdw ~]# chown -R gpadmin:gpadmin /opt/greenplum<br />
+因为只在master上安装了Greenplum，所以接下来要将安装包批量发送到每个segment上，才能算是整个集群完整安装了Greenplum。<br />
+<br />
+下面的操作都是为了连接所有节点，并将安装包发送到每个节点。<br />
+<br />
+2.4&nbsp; 创建配置文件<br />
+[root@mdw ~]# su – gpadmin<br />
+[gpadmin@mdw ~]$ mkdir conf<br />
+[gpadmin@mdw ~]$ cd conf<br />
+[gpadmin@mdw conf]$ vi hostlist<br />
+<br />
+mdw<br />
+sdw1<br />
+sdw2<br />
+sdw3<br />
+<br />
+[gpadmin@mdw conf]$ vi seg_hosts<br />
+<br />
+sdw1<br />
+sdw2<br />
+sdw3<br />
+注意:此时需要转换成gpadmin身份来操作了，按照上面的文件内容创建hostlist和seg_hosts文件备用。<br />
+<br />
+hostlist存储了所有节点的主机名，seg_hosts存储了所有从节点的主机名。<br />
+<br />
+这里文件中的mdw、sdw1、sdw2、sdw3即为之前在 /etc/hosts文件中配置的最后一个参数。<br />
+<br />
+2.5&nbsp; 打通所有节点<br />
+greenplum_path.sh中保存了运行Greenplum的一些环境变量设置，包括GPHOOME、PYTHONHOME等设置。<br />
+<br />
+[gpadmin@mdw ~]$ source /opt/greenplum/greenplum-db/greenplum_path.sh<br />
+<br />
+[gpadmin@mdw ~]$ gpssh-exkeys -f /home/gpadmin/conf/hostlist<br />
+<br />
+[STEP 1 of 5] create local ID and authorize on local host<br />
+&nbsp; ... /home/gpadmin/.ssh/id_rsa file exists ... key generation skipped<br />
+<br />
+<br />
+[STEP 2 of 5] keyscan all hosts and update known_hosts file<br />
+<br />
+[STEP 3 of 5] authorize current user on remote hosts<br />
+&nbsp; ... send to sdw1<br />
+&nbsp; ... send to sdw2<br />
+&nbsp; ... send to sdw3<br />
+<br />
+<br />
+[STEP 4 of 5] determine common authentication file content<br />
+<br />
+[STEP 5 of 5] copy authentication files to all remote hosts<br />
+&nbsp; ... finished key exchange with sdw1<br />
+&nbsp; ... finished key exchange with sdw2<br />
+&nbsp; ... finished key exchange with sdw3<br />
+<br />
+[INFO] completed successfully<br />
+注意：<br />
+<br />
+(1)首次执行gpssh-exkeys命令时，在[STEP 3 of 5]，要输入每个segment节点的gpadmin用户的密码。<br />
+<br />
+(2)gpssh-exkeys命令使用的时候一定要用gpadmin身份，因为这个命令会生成ssh的免密码登录的秘钥，在/home/gpadmin/.ssh这里。如果以root身份使用gpssh-exkeys命令，那么生成的.ssh秘钥在root的home下面或者是在/home/gpadmin下面但是是root的所有者，如果之后使用gpadmin身份执行相应操作的时候就没有权限。<br />
+<br />
+[INFO] completed successfully 这就说明成功打通了，之后就可以使用下面的命令开启批量操作，如下：<br />
+<br />
+[gpadmin@mdw ~]$ gpssh -f /home/gpadmin/conf/hostlist<br />
+Note: command history unsupported on this machine ...<br />
+=&gt; pwd<br />
+<br />
+[sdw1] /home/gpadmin<br />
+[sdw3] /home/gpadmin<br />
+[sdw2] /home/gpadmin<br />
+[ mdw] /home/gpadmin<br />
+=&gt; exit<br />
+这里pwd命令是linux中的查看路径命令，这里也是查看一下批量操作时所处的位置，从中可以看到同时连接到了4个节点。这里如果/etc/hosts文件中参数只设置了两个，没有设置主机名，就只能同时连接2个节点，而且是随机的。<br />
+<br />
+这里我们只是测试一下，exit之后先做一些其他的操作。<br />
+<br />
+2.6&nbsp; 将安装包分发到每个子节点<br />
+打通之后需要将master中的greenplum安装包批量复制到各个segment节点上。<br />
+<br />
+[gpadmin@mdw conf]$ cd /opt/greenplum/<br />
+打包：<br />
+<br />
+[gpadmin@mdw greenplum]$ tar -cf gp.4.3.tar greenplum-db-4.3.9.1/<br />
+然后利用gpscp命令将这个文件复制到每一台机器上：<br />
+<br />
+[gpadmin@mdw greenplum]$ gpscp -f /home/gpadmin/conf/seg_hosts gp.4.3.tar =:/opt/greenplum/<br />
+如果没有意外，就批量复制成功了，可以去子节点的相应文件夹查看，之后要将tar包解压，我们使用批量操作。<br />
+<br />
+[gpadmin@mdw greenplum]$ cd ~/conf/<br />
+<br />
+[gpadmin@mdw conf]$ gpssh -f seg_hosts<br />
+<br />
+Note: command history unsupported on this machine ...<br />
+<br />
+=&gt; cd /opt/greenplum<br />
+[sdw3]<br />
+[sdw1]<br />
+[sdw2]<br />
+<br />
+=&gt; tar -xf gp.4.3.tar<br />
+[sdw3]<br />
+[sdw1]<br />
+[sdw2]<br />
+<br />
+建立软链接<br />
+<br />
+=&gt; ln -s ./greenplum-db-4.3.9.1 greenplum-db<br />
+[sdw3]<br />
+[sdw1]<br />
+[sdw2]<br />
+<br />
+=&gt; ll(可以使用ll查看一下是否已经安装成功)<br />
+<br />
+=&gt; exit<br />
+这样就完成了所有节点的安装。<br />
+<br />
+3 初始化数据库<br />
+在初始化之前的的几个步骤都是做一些准备工作。<br />
+<br />
+3.1&nbsp; 批量创建Greenplum数据存放目录<br />
+[gpadmin@mdw conf]$ gpssh -f hostlist<br />
+<br />
+=&gt; mkdir gpdata<br />
+[sdw3]<br />
+[mdw]<br />
+[sdw2]<br />
+[sdw1]<br />
+<br />
+=&gt; cd gpdata<br />
+[sdw3]<br />
+[mdw]<br />
+[sdw2]<br />
+[sdw1]<br />
+<br />
+=&gt; mkdir gpmaster gpdatap1 gpdatap2 gpdatam1 gpdatam2<br />
+[sdw3]<br />
+[mdw]<br />
+[sdw2]<br />
+[sdw1]<br />
+<br />
+=&gt; ll<br />
+<br />
+=&gt; exit<br />
+3.2&nbsp; 配置.bash_profile环境变量（每台机器都要）<br />
+编辑.bash_profile文件，添加以下内容：<br />
+<br />
+[gpadmin@mdw ~]$ cd ~<br />
+[gpadmin@mdw ~]$ vi .bash_profile<br />
+<br />
+source /opt/greenplum/greenplum-db/greenplum_path.sh<br />
+export MASTER_DATA_DIRECTORY=/home/gpadmin/gpdata/gpmaster/gpseg-1<br />
+export PGPORT=5432<br />
+export PGDATABASE=testDB<br />
+<br />
+[gpadmin@mdw ~]$ source .bash_profile（让环境变量生效）<br />
+注意：PGPORT指的是你安装greenplum数据库的端口号。<br />
+<br />
+这里有个问题，Greenplum自己会安装一个Python包，是2.6.6的。而CentOS6.5本身自带有一个Python包，是2.6.2的，设置了以上的环境变量了之后，使用yum安装一些软件的时候就会出现问题（因为yum是基于Python的），因为系统就发现自己有两个Python包，他不知道用哪一个了。我还没有试过更新系统的Python包，需要安装软件的时候，我就将环境变量都注释掉，安装完之后再让他生效。<br />
+<br />
+3.3&nbsp; 创建初始化配置文件（只需master即可）<br />
+[gpadmin@mdw ~]$ vi /home/gpadmin/conf/gpinitsystem_config<br />
+<br />
+ARRAY_NAME="Greenplum"<br />
+SEG_PREFIX=gpseg<br />
+PORT_BASE=33000<br />
+declare -a DATA_DIRECTORY=(/home/gpadmin/gpdata/gpdatap1&nbsp; /home/gpadmin/gpdata/gpdatap2)<br />
+MASTER_HOSTNAME=mdw<br />
+MASTER_DIRECTORY=/home/gpadmin/gpdata/gpmaster<br />
+MASTER_PORT=5432<br />
+TRUSTED_SHELL=/usr/bin/ssh<br />
+MIRROR_PORT_BASE=43000<br />
+REPLICATION_PORT_BASE=34000<br />
+MIRROR_REPLICATION_PORT_BASE=44000<br />
+declare -a MIRROR_DATA_DIRECTORY=(/home/gpadmin/gpdata/gpdatam1 /home/gpadmin/gpdata/gpdatam2)<br />
+MACHINE_LIST_FILE=/home/gpadmin/conf/seg_hosts<br />
+3.4&nbsp; 初始化数据库（只需master即可）<br />
+[gpadmin@mdw ~]$ gpinitsystem -c /home/gpadmin/conf/gpinitsystem_config -s sdw3<br />
+其中sdw3是指master的standby所在的节点，我看书上和网上的一些资料都将standby放在最后一个节点，可能是约定俗成的吧。<br />
+<br />
+注意：如果上面有一些配置有问题，gpinitsystem就不能成功，日志在主节点/home/gpadmin/gpAdminLogs/的gpinitsystem_2016XXXX.log文件中。<br />
+<br />
+需要注意的是如果初始化失败，一定要认真查看这个日志文件，一味重复安装没有太大意义，重要的是要找到主要原因。<br />
+<br />
+4 测试运行安装的Greenplum数据库<br />
+4.1&nbsp; 启动和停止数据库测试是否能正常启动和关闭<br />
+# gpstart<br />
+# gpstop<br />
+4.2&nbsp; 访问数据库<br />
+# psql -d postgres<br />
+<br />
+psql (8.2.15)<br />
+Type "help" for help.<br />
+postgres=#<br />
+出现以上界面，恭喜你已经安装成功了。<br />
+<br />
+输入查询语句，查看是否可以执行。<br />
+<br />
+postgres=# select datname,datdba,encoding,datacl from pg_database;<br />
+<br />
+&nbsp; datname&nbsp; | datdba | encoding |&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; datacl&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<br />
+-----------+--------+----------+----------------------------------<br />
+&nbsp;postgres&nbsp; |&nbsp; &nbsp; &nbsp;10 |&nbsp; &nbsp; &nbsp; &nbsp; 6 |<br />
+&nbsp;template1 |&nbsp; &nbsp; &nbsp;10 |&nbsp; &nbsp; &nbsp; &nbsp; 6 | {=c/gpadmin,gpadmin=CTc/gpadmin}<br />
+&nbsp;template0 |&nbsp; &nbsp; &nbsp;10 |&nbsp; &nbsp; &nbsp; &nbsp; 6 | {=c/gpadmin,gpadmin=CTc/gpadmin}<br />
+(3 rows)<br />
+postgres=# \q（退出）<br />
+5 安装pgadmin Ⅲ客户端<br />
+安装pgadmin Ⅲ，使用该客户端，连接greenplum 4.3数据库<br />
+<br />
+5.1&nbsp; 用户创建密码<br />
+postgres =# alter role gpadmin with password 'gpadmin';<br />
+5.2&nbsp; 添加新的客户端服务器信息<br />
+在master节点的 $MASTER_DATA_DIRECTORY/pg_hba.conf 中添加新的客户端服务器信息。master节点的pg_hba.conf配置文件，控制客户端访问Greenplum系统。<br />
+<br />
+注意：segment节点也有pg_hba.conf配置文件，它只能控制master节点能否访问segment，决不能运行客户端连接。所以不要修改segment的pg_hba.conf文件。<br />
+<br />
+格式：<br />
+<br />
+host&nbsp; database&nbsp; role&nbsp; CIDR-address&nbsp; authentication-method<br />
+pg_hba.conf中记录是被顺序读取的，所有记录的顺序是有象征性意义的。<br />
+<br />
+通常前面的记录匹配更少的连接但要求较弱的认证，后面的记录匹配更多的连接但要求更严格的认证。<br />
+<br />
+例如：允许gpadmin用户在192.168.0.x网段访问所有数据库，使用md5验证。<br />
+<br />
+# vi $MASTER_DATA_DIRECTORY/pg_hba.conf<br />
+<br />
+host&nbsp; &nbsp; &nbsp;all&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;gpadmin&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;192.168.0.0/24&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;md5<br />
+在master重新加载pg_hba.conf文件，需要重启Greenplum数据库。<br />
+<br />
+# gpstop –a<br />
+# gpstart –a<br />
+5.3&nbsp; 验证客户端能否连接数据库<br />
+# psql -h 192.168.1.171 -p 2345 -d postgres -U gpadmin -W<br />
+Password for user gpadmin:&nbsp;<br />
+-h 192.168.1.171 是指定连接master的ip地址<br />
+<br />
+-p 5432 是安装greenplum数据库时，设置的端口号，当前数据库端口号是2345<br />
+<br />
+-u gpadmin 是指定连接的用户名
+</p>
+<p>
+	<br />
+</p>
+<div>
+	[gpadmin@oracledb bin]$ psql -h 192.168.1.118 -p 5432 -d postgres gpadmin -U gpadmin -W<br />
+psql: warning: extra command-line argument "gpadmin" ignored<br />
+Password for user gpadmin: <br />
+psql (8.3.23)<br />
+Type "help" for help.
+</div>
+<p>
+	postgres=# alter role gpadmin PASSWORD 'gpadmin';
+</p>
+<p>
+	<br />
+</p>
+<p>
+	./gpinitstandby -s gpdb6 -P 2345 -S /home/gpadmin/gpdata/gpstandby
+</p>
+<p>
+	<br />
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

@@ -1,0 +1,80 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hive-0.8.1配置Web接口-hwi - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Hive-0.8.1配置Web接口-hwi</h1>
+
+	<div class="text"><p>
+	1:获取hive源码，把web目录重新打包成hive-hwi-0.8.1.war放到lib目录下
+</p>
+<p>
+	2:修改hive配置文件hive-site.xml，添加内容
+</p>
+<p>
+	&nbsp;&nbsp;&nbsp; &lt;property&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;name&gt;hive.hwi.listen.host&lt;/name&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;value&gt;0.0.0.0&lt;/value&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;/property&gt;<br />
+<br />
+&nbsp;&nbsp;&nbsp; &lt;property&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;name&gt;hive.hwi.listen.port&lt;/name&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;value&gt;9999&lt;/value&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;/property&gt; &nbsp;<br />
+<br />
+&nbsp;&nbsp;&nbsp; &lt;property&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;name&gt;hive.hwi.war.file&lt;/name&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;value&gt;lib/hive-hwi-0.8.1.war&lt;/value&gt;<br />
+&nbsp;&nbsp;&nbsp; &lt;/property&gt;
+</p>
+<p>
+	3:启动hwi服务./hive --service hwi
+</p>
+<p>
+	4:访问http://hadoopmaster1:9999/hwi
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

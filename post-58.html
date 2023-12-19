@@ -1,0 +1,166 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Centos7.6安装redis - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Centos7.6安装redis</h1>
+
+	<div class="text"><pre>
+yum install epel-release
+yum install redis
+
+vi /etc/redis.conf
+bind 192.168.184.12
+requirepass redis
+protected-mode no
+
+systemctl start redis.service
+systemctl enable redis.service
+
+
+redis-cli -h 192.168.184.12 -p 6379
+auth redis
+
+下载jedis-3.1.0.jar
+
+import redis.clients.jedis.Jedis;
+
+public class TEST {
+
+    public static void main(String[] args) {
+        Jedis j = new Jedis("192.168.184.12",6379);
+        j.auth("redis");
+        j.set("key1", "lijiahong");
+        String s = j.get("key1");
+        System.out.println(s);
+    }
+
+}
+
+
+【转】
+public class RedisUtil {
+
+    //服务器IP地址
+    private static String ADDR = "192.168.41.65";
+    //端口
+    private static int PORT = 6379;
+    //密码
+    private static String AUTH = "123456";
+    //连接实例的最大连接数
+    private static int MAX_ACTIVE = 1024;
+    //控制一个pool最多有多少个状态为idle(空闲的)的jedis实例，默认值也是8。
+    private static int MAX_IDLE = 200;
+    //等待可用连接的最大时间，单位毫秒，默认值为-1，表示永不超时。如果超过等待时间，则直接抛出JedisConnectionException
+    private static int MAX_WAIT = 10000;
+    //连接超时的时间　　
+    private static int TIMEOUT = 10000;
+    // 在borrow一个jedis实例时，是否提前进行validate操作；如果为true，则得到的jedis实例均是可用的；
+    private static boolean TEST_ON_BORROW = true;
+
+    private static JedisPool jedisPool = null;
+    //数据库模式是16个数据库 0~15 
+    public static final int DEFAULT_DATABASE = 0;
+    /**
+     * 初始化Redis连接池
+     */
+
+    static {
+
+        try {
+
+            JedisPoolConfig config = new JedisPoolConfig();
+            config.setMaxTotal(MAX_ACTIVE);
+            config.setMaxIdle(MAX_IDLE);
+            config.setMaxWaitMillis(MAX_WAIT);
+            config.setTestOnBorrow(TEST_ON_BORROW);
+            jedisPool = new JedisPool(config, ADDR, PORT, TIMEOUT,AUTH,DEFAULT_DATABASE);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 获取Jedis实例
+     */
+
+    public synchronized static Jedis getJedis() {
+
+        try {
+
+            if (jedisPool != null) {
+                Jedis resource = jedisPool.getResource();
+                System.out.println("redis--服务正在运行: "+resource.ping());
+                return resource;
+            } else {
+                return null;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
+
+    /***
+     * 
+     * 释放资源
+     */
+    
+    public static void returnResource(final Jedis jedis) {
+            if(jedis != null) {
+                jedisPool.returnResource(jedis);
+            }
+        
+    }
+}
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

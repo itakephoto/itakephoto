@@ -1,0 +1,167 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hadoop1.x分布式安装与配置 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Hadoop1.x分布式安装与配置</h1>
+
+	<div class="text">(1)虚拟机环境准备<br />
+192.168.184.130 hadoopmaster1<br />
+192.168.184.131 hadoopslave1<br />
+192.168.184.132 hadoopslave2<br />
+192.168.184.133 hadoopslave3<br />
+<br />
+(2)配置虚拟机，机器名，host，固定ip，安装java环境<br />
+#vi /etc/sysconfig/network<br />
+NETWORKING=yes<br />
+NETWORKING_IPV6=no<br />
+HOSTNAME=hadoopmaster1<br />
+<br />
+#vi /etc/sysconfig/network-scripts/ifcfg-eth0<br />
+DEVICE=eth0<br />
+NETMASK=255.255.255.0<br />
+IPADDR=192.168.184.128<br />
+BOOTPROTO=static<br />
+ONBOOT=yes<br />
+GATEWAY=192.168.1184.2<br />
+DNS1=192.168.184.2<br />
+PEERDNS=yes<br />
+<br />
+#vi /etc/resolv.conf<br />
+nameserver 8.8.8.8&nbsp;<br />
+<br />
+#重启网络服务<br />
+# /etc/init.d/network restart<br />
+<br />
+#vi /etc/hosts<br />
+192.168.184.130 hadoopmaster1<br />
+192.168.184.131 hadoopslave1<br />
+192.168.184.132 hadoopslave2<br />
+192.168.184.133 hadoopslave3<br />
+<br />
+# vi /etc/profile<br />
+export JAVA_HOME=/usr/java/jdk1.7.0_80<br />
+export CLASSPATH=.:$JAVA_HOME/lib:$JAVA_HOME/jre/lib<br />
+export PATH=$JAVA_HOME/lib:$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH:$HOME/bin:$PATH<br />
+export JAVA_TOOLS=$JAVA_HOME/lib/tools.jar<br />
+<br />
+(3)创建hadoop用户，并配置SSH免密码登录<br />
+在每一台机器上执行<br />
+#su hadoop<br />
+#cd ~<br />
+#ssh-keygen -t rsa -P ''<br />
+在每一台机器上把以下文件的内容copy到hadoopmaster1机器上<br />
+#cat ~/.ssh/id_rsa.pub &gt;&gt; ~/.ssh/authorized_keys&nbsp;<br />
+#chmod 600 ~/.ssh/authorized_keys&nbsp;<br />
+#su &nbsp;--切换到root用户<br />
+#vi /etc/ssh/sshd_config&nbsp;<br />
+&nbsp;RSAAuthentication yes #启用RSA认证<br />
+&nbsp;PubkeyAuthentication yes #启用公钥私钥配对认证方式<br />
+&nbsp;AuthorizedKeysFile .ssh/authorized_keys #公钥文件路径<br />
+#su hadoop --切换到hadoop用户<br />
+然后把hadoopmaster1的authorized_keys文件copy到hadoopsalve1，hadoopsalve2，hadoopslave3机器上。<br />
+#ssh hadoopslave1<br />
+如果不需要密码，则表示成功。<br />
+<br />
+(4)配置hadoop<br />
+将hadoop-1.0.1.tar.gz放到hadoopmaster1机器上，并解压<br />
+/home/hadoop/hadoop-1.0.1<br />
+<br />
+修改配置文件<br />
+#vi conf/core-site.xml<br />
+&lt;configuration&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;fs.default.name&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;hdfs://hadoopmaster1:9000&lt;/value&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;/property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;hadoop.tmp.dir&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;/home/hadoop/tmp&lt;/value&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;/property&gt;<br />
+&lt;/configuration&gt;<br />
+<br />
+修改Hadoop中HDFS的配置，配置的备份方式默认为3。<br />
+&nbsp;(备注：replication 是数据副本数量，默认为3，salve少于3台就会报错)<br />
+#vi conf/hdfs-site.xml<br />
+&lt;configuration&gt;<br />
+&nbsp; &nbsp; &lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;dfs.replication&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;3&lt;/value&gt;<br />
+&nbsp; &nbsp; &lt;/property&gt;<br />
+&lt;configuration&gt;<br />
+<br />
+修改Hadoop中MapReduce的配置文件，配置的是JobTracker的地址和端口。<br />
+#vi conf/mapred-site.xml<br />
+&lt;configuration&gt;<br />
+&nbsp; &nbsp; &lt;property&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;name&gt;mapred.job.tracker&lt;/name&gt;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &lt;value&gt;http://hadoopmaster1:9001&lt;/value&gt;<br />
+&nbsp; &nbsp; &lt;/property&gt;<br />
+&lt;/configuration&gt;<br />
+<br />
+配置masters文件<br />
+# vi masters&nbsp;<br />
+hadoopmaster1<br />
+<br />
+slaves文件（Master主机特有）<br />
+# vi slaves&nbsp;<br />
+hadoopslave1<br />
+hadoopslave2<br />
+hadoopslave3<br />
+<br />
+启动hadoop<br />
+/home/hadoop/hadoop-1.0.1/bin/hadoop namenode -format<br />
+/home/hadoop/hadoop-1.0.1/bin/start-all.sh<br />
+/home/hadoop/hadoop-1.0.1/bin/stop-all.sh&nbsp;<br />
+/home/hadoop/hadoop-1.0.1/bin/hadoop dfsadmin -report<br />
+<br />
+http://hadoopmaster1:50070/dfshealth.jsp<br />
+http://hadoopmaster1:50030/jobtracker.jsp<br />
+<div style="white-space:nowrap;">
+	<br />
+</div></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

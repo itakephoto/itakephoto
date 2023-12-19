@@ -1,0 +1,62 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Greenplum高可用-Segment故障转移 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Greenplum高可用-Segment故障转移</h1>
+
+	<div class="text">1：在Segment机器执行kill，模拟宕机故障<br />
+<br />
+2：执行gpstate -v 查看故障信息<br />
+<a target="_blank" href="https://lijiahong.com/e2861611306991.png" id="ematt:69"><img src="https://lijiahong.com/e2861611306991.png" title="点击查看原图" alt="segment.png" border="0" width="741" height="614" /></a><br />
+3：故障节点恢复，执行gprecoverseg<br />
+<a target="_blank" href="https://lijiahong.com/b4d61611307028.png" id="ematt:71"><img src="https://lijiahong.com/b4d61611307028.png" title="点击查看原图" alt="segment_gprecoverseg.png" border="0" width="1132" height="742" /></a><a target="_blank" href="https://lijiahong.com/c1871611307061.png" id="ematt:73"><img src="https://lijiahong.com/c1871611307061.png" title="点击查看原图" alt="segment2.png" border="0" width="749" height="619" /></a><br />
+4：切换回原集群状态，执行gprecoverseg -r<br />
+<br />
+5：切换完成，查看集群状态<br />
+<a target="_blank" href="https://lijiahong.com/77581611307150.png" id="ematt:75"><img src="https://lijiahong.com/77581611307150.png" title="点击查看原图" alt="segment3.png" border="0" width="675" height="622" /></a></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

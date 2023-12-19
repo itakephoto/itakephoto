@@ -1,0 +1,283 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hadoop2.x(yarn)分布式安装与配置 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Hadoop2.x(yarn)分布式安装与配置</h1>
+
+	<div class="text"><strong>(1)服务器准备</strong><br />
+192.168.119.130 gp-master # NameNode,ResourceManager<br />
+192.168.119.131 gp-slave1 # SecondaryNameNode,NodeManager,DataNode<br />
+192.168.119.132 gp-slave2 # NodeManager,DataNode<br />
+192.168.119.133 gp-slave3 # NodeManager,DataNode<br />
+<br />
+<strong>(2)安装java，及ssh免密配置</strong><br />
+<br />
+<strong>(3)新建文件夹</strong><br />
+/home/gpadmin/hadoop/data/hdfs/data<br />
+/home/gpadmin/hadoop/data/hdfs/name<br />
+/home/gpadmin/hadoop/data/hdfs/tmp<br />
+<br />
+<strong>(4)解压hadoop</strong><br />
+/home/gpadmin/hadoop/hadoop-2.6.0<br />
+<br />
+<strong>(5)配置文件修改</strong><br />
+<strong>修改以下文件的java路径</strong><br />
+/home/gpadmin/hadoop/hadoop-2.6.0/etc/hadoop/yarn-env.sh<br />
+/home/gpadmin/hadoop/hadoop-2.6.0/etc/hadoop/hadoop-env.sh<br />
+<br />
+<strong>修改/home/gpadmin/hadoop/hadoop-2.6.0/etc/hadoop/core-site.xml</strong><br />
+<p>
+	&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+</p>
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;<br />
+&lt;!--<br />
+&nbsp; Licensed under the Apache License, Version 2.0 (the "License");<br />
+&nbsp; you may not use this file except in compliance with the License.<br />
+&nbsp; You may obtain a copy of the License at<br />
+<br />
+&nbsp; &nbsp; http://www.apache.org/licenses/LICENSE-2.0<br />
+<br />
+&nbsp; Unless required by applicable law or agreed to in writing, software<br />
+&nbsp; distributed under the License is distributed on an "AS IS" BASIS,<br />
+&nbsp; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />
+&nbsp; See the License for the specific language governing permissions and<br />
+&nbsp; limitations under the License. See accompanying LICENSE file.<br />
+--&gt;<br />
+<br />
+<br />
+&lt;!-- Put site-specific property overrides in this file. --&gt;<br />
+&lt;configuration&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;hadoop.tmp.dir&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;file:/home/gpadmin/hadoop/data/hdfs/tmp&lt;/value&gt;<br />
+<span style="white-space:pre;"> </span>&lt;description&gt;A base for other temporary directories.&lt;/description&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;io.file.buffer.size&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;131072&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;fs.default.name&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;hdfs://gp-master:9000&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;hadoop.proxyuser.root.hosts&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;*&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;hadoop.proxyuser.root.groups&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;*&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;fs.checkpoint.period&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;60&lt;/value&gt;<br />
+<span style="white-space:pre;"> </span>&lt;description&gt;The number of seconds between two periodic checkpoints.&lt;/description&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;fs.checkpoint.size&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;67108864&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;<br />
+<br />
+<strong>修改/home/gpadmin/hadoop/hadoop-2.6.0/etc/hadoop/hdfs-site.xml</strong><br />
+<br />
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;<br />
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;<br />
+&lt;!--<br />
+&nbsp; Licensed under the Apache License, Version 2.0 (the "License");<br />
+&nbsp; you may not use this file except in compliance with the License.<br />
+&nbsp; You may obtain a copy of the License at<br />
+<br />
+&nbsp; &nbsp; http://www.apache.org/licenses/LICENSE-2.0<br />
+<br />
+&nbsp; Unless required by applicable law or agreed to in writing, software<br />
+&nbsp; distributed under the License is distributed on an "AS IS" BASIS,<br />
+&nbsp; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />
+&nbsp; See the License for the specific language governing permissions and<br />
+&nbsp; limitations under the License. See accompanying LICENSE file.<br />
+--&gt;<br />
+<br />
+&lt;!-- Put site-specific property overrides in this file. --&gt;<br />
+<br />
+&lt;configuration&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.replication&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;3&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.namenode.name.dir&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;file:/home/gpadmin/hadoop/data/hdfs/name&lt;/value&gt;<br />
+<span style="white-space:pre;"> </span>&lt;final&gt;true&lt;/final&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.datanode.data.dir&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;file:/home/gpadmin/hadoop/data/hdfs/data&lt;/value&gt;<br />
+<span style="white-space:pre;"> </span>&lt;final&gt;true&lt;/final&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.http.address&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gp-master:50070&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.namenode.secondary.http-address&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gp-slave1:50090&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.webhdfs.enabled&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;true&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;dfs.permissions&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;false&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;<br />
+<br />
+<strong>修改/home/gpadmin/hadoop/hadoop-2.6.0/etc/hadoop/mapred-site.xml</strong><br />
+<p>
+	<br />
+</p>
+<p>
+	&lt;?xml version="1.0"?&gt;
+</p>
+&lt;?xml-stylesheet type="text/xsl" href="configuration.xsl"?&gt;<br />
+&lt;!--<br />
+&nbsp; Licensed under the Apache License, Version 2.0 (the "License");<br />
+&nbsp; you may not use this file except in compliance with the License.<br />
+&nbsp; You may obtain a copy of the License at<br />
+<br />
+&nbsp; &nbsp; http://www.apache.org/licenses/LICENSE-2.0<br />
+<br />
+&nbsp; Unless required by applicable law or agreed to in writing, software<br />
+&nbsp; distributed under the License is distributed on an "AS IS" BASIS,<br />
+&nbsp; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />
+&nbsp; See the License for the specific language governing permissions and<br />
+&nbsp; limitations under the License. See accompanying LICENSE file.<br />
+--&gt;<br />
+<br />
+<br />
+&lt;!-- Put site-specific property overrides in this file. --&gt;<br />
+<br />
+&lt;configuration&gt;<br />
+&lt;property&gt;<br />
+&nbsp; &nbsp; &lt;name&gt;mapreduce.framework.name&lt;/name&gt;<br />
+&nbsp; &nbsp; &lt;value&gt;yarn&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;<br />
+<br />
+<strong>修改/home/gpadmin/hadoop/hadoop-2.6.0/etc/hadoop/yarn-site.xml</strong><br />
+<p>
+	<br />
+</p>
+<p>
+	&lt;?xml version="1.0"?&gt;
+</p>
+&lt;!--<br />
+&nbsp; Licensed under the Apache License, Version 2.0 (the "License");<br />
+&nbsp; you may not use this file except in compliance with the License.<br />
+&nbsp; You may obtain a copy of the License at<br />
+<br />
+&nbsp; &nbsp; http://www.apache.org/licenses/LICENSE-2.0<br />
+<br />
+&nbsp; Unless required by applicable law or agreed to in writing, software<br />
+&nbsp; distributed under the License is distributed on an "AS IS" BASIS,<br />
+&nbsp; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.<br />
+&nbsp; See the License for the specific language governing permissions and<br />
+&nbsp; limitations under the License. See accompanying LICENSE file.<br />
+--&gt;<br />
+<br />
+&lt;configuration&gt;<br />
+<br />
+&lt;!-- Site specific YARN configuration properties --&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;yarn.resourcemanager.address&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gp-master:18040&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;yarn.resourcemanager.scheduler.address&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gp-master:18030&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;yarn.resourcemanager.webapp.address&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gp-master:18088&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;yarn.resourcemanager.resource-tracker.address&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gp-master:18025&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;yarn.resourcemanager.admin.address&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;gp-master:18141&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;yarn.nodemanager.aux-services&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;mapreduce_shuffle&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;property&gt;<br />
+<span style="white-space:pre;"> </span>&lt;name&gt;yarn.nodemanager.aux-services.mapreduce.shuffle.class&lt;/name&gt;<br />
+<span style="white-space:pre;"> </span>&lt;value&gt;org.apache.hadoop.mapred.ShuffleHandler&lt;/value&gt;<br />
+&lt;/property&gt;<br />
+&lt;/configuration&gt;<br />
+<br />
+<strong>修改/home/gpadmin/hadoop/hadoop-2.6.0/etc/hadoop/masters</strong><br />
+gp-master<br />
+<br />
+<strong>修改/home/gpadmin/hadoop/hadoop-2.6.0/etc/hadoop/slaves</strong><br />
+gp-slave1<br />
+gp-slave2<br />
+gp-slave3<br />
+<br />
+<strong>(6)运行hadoop,yarn</strong><br />
+/home/gpadmin/hadoop/hadoop-2.6.0/bin/hadoop namenode -format<br />
+/home/gpadmin/hadoop/hadoop-2.6.0/sbin/start-all.sh<br />
+/home/gpadmin/hadoop/hadoop-2.6.0/sbin/stop-all.sh<br />
+<br />
+http://192.168.119.130:50070/dfshealth.html<br />
+http://192.168.119.130:18088/cluster<br />
+/home/gpadmin/hadoop/hadoop-2.6.0/bin/hadoop dfsadmin -report<br />
+<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

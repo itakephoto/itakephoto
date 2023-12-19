@@ -1,0 +1,67 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hive-0.8.1 JDBC连接中文乱码解决 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Hive-0.8.1 JDBC连接中文乱码解决</h1>
+
+	<div class="text"><p>
+	找到源码中的org.apache.hadoop.hive.jdbc.HiveQueryResultSet
+</p>
+<p>
+	把代码：Object data = serde.deserialize(new BytesWritable(rowStr.getBytes()));
+</p>
+<p>
+	修改为：Object data = serde.deserialize(new BytesWritable(rowStr.getBytes("UTF-8")));
+</p>
+<p>
+	编译后，覆盖到包：hive-jdbc-0.8.1.jar
+</p>
+<p>
+	PS:先开始服务才能连接./hive --service hiveserver
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

@@ -1,0 +1,99 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Python使用Managed Identity免密连接SQL Server - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Python使用Managed Identity免密连接SQL Server</h1>
+
+	<div class="text">1:Prerequisites<br />
+<br />
+1):Create Managed Identity<br />
+Name: msi-vm-01<br />
+Object ID: 476f4bc2-32f0-4e3d-8280-99de7745d159<br />
+&nbsp;<br />
+2):Assign Managed Identity to VM<br />
+&nbsp;<br />
+3):Grant db role to Managed Identity<br />
+CREATE USER "<span style="text-wrap:wrap;">msi-vm-01</span>" FROM EXTERNAL PROVIDER;<br />
+ALTER ROLE db_datareader ADD MEMBER "<span style="text-wrap:wrap;">msi-vm-01</span>";<br />
+ALTER ROLE db_datawriter ADD MEMBER "<span style="text-wrap:wrap;">msi-vm-01</span>";<br />
+2:Python Environment Set Up<br />
+<br />
+pip install pyodbc<br />
+pip install azure-identity<br />
+<br />
+3:Connect to SQL Server using Python Demo<br />
+<br />
+from azure.identity import DefaultAzureCredential<br />
+import pyodbc, struct<br />
+<br />
+#create credential with user-assigned identity<br />
+credential = DefaultAzureCredential(managed_identity_client_id='476f4bc2-xxxx-4e3d-8280-9xxxxxx')&nbsp;<br />
+<br />
+#get token<br />
+token = credential.get_token("https://database.windows.net/.default").token.encode("UTF-16-LE")<br />
+token_struct = struct.pack(f'&lt;I{len(token)}s', len(token), token)<br />
+<br />
+# Connect SQL Server with the token<br />
+SQL_COPT_SS_ACCESS_TOKEN = 1256<br />
+server_name="xxxx"<br />
+database_name="xxxxx"<br />
+connString = f"Driver={{ODBC Driver 17 for SQL Server}};SERVER="+server_name+".database.windows.net;DATABASE="+database_name<br />
+conn = pyodbc.connect(connString, attrs_before={SQL_COPT_SS_ACCESS_TOKEN: token_struct})<br />
+cursor = conn.cursor()<br />
+<br />
+#execute sql<br />
+sql_command="SELECT TOP (1000) [EntityID],[Name],[BaseCurrency],[BU] FROM [dbo].[tblEntities]"<br />
+cursor.execute(sql_command)<br />
+<br />
+rows = cursor.fetchall()<br />
+for row in rows:<br />
+&nbsp; &nbsp; print(row)<br />
+<div style="white-space:nowrap;">
+	<br />
+</div></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

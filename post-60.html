@@ -1,0 +1,112 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Java序列化和反序列 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Java序列化和反序列</h1>
+
+	<div class="text"><pre>
+首先先定义一个user类需继承Serializable
+package test;
+
+import java.io.IOException;
+import java.io.Serializable;
+
+public class user implements Serializable {
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+}   
+
+编写一个测试类，生成一个user对象，将其序列化后的字节保存在硬盘上，然后再读取被序列化后的字节，将其反序列化后输入user的name属性
+package test;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
+public class test1 {
+    public static void main(String[] args) {
+        try {
+            FileOutputStream out =new FileOutputStream("d:/1.bin");
+            ObjectOutputStream obj_out = new ObjectOutputStream(out);
+            user u = new user();
+            u.setName("test");
+            obj_out.writeObject(u);
+
+            //利用readobject方法还原user对象
+            FileInputStream in = new FileInputStream("d:/1.bin");
+            ObjectInputStream ins = new ObjectInputStream(in);
+            user u1 = (user)ins.readObject(); 
+
+            System.err.println(u1.getName());
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+    }
+}
+
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

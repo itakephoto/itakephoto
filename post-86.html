@@ -1,0 +1,75 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Python使用Azure服务主体连接Storage Account - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Python使用Azure服务主体连接Storage Account</h1>
+
+	<div class="text"><pre>
+
+from azure.identity import ClientSecretCredential
+from adal.authentication_context import AuthenticationContext
+from azure.storage.blob import BlobServiceClient
+
+_secret_scope = "test1"
+_client_id = dbutils.secrets.get(_secret_scope, key="sp_client_id")
+_client_secret = dbutils.secrets.get(_secret_scope, key="sp_client_secret")
+_tenant_id = dbutils.secrets.get(_secret_scope, key="tenant_id")
+
+_credential = ClientSecretCredential(tenant_id=_tenant_id,client_id=_client_id,client_secret=_client_secret)
+
+_blob_url = f"https://land01.blob.core.windows.net/"
+_blob_service_client = BlobServiceClient(account_url=_blob_url,credential=_credential)
+
+_container_client = _blob_service_client.get_container_client("user-drop-zone-dev")
+_blob_iterator = _container_client.list_blobs()
+
+for blob in _blob_iterator:
+  print(blob.name)
+
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

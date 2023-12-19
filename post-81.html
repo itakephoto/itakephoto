@@ -1,0 +1,82 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Flume实时采集日志到Kafka（极简版） - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Flume实时采集日志到Kafka（极简版）</h1>
+
+	<div class="text">转自：https://www.pianshen.com/article/6868334446/<br />
+<br />
+wget -c https://mirrors.bfsu.edu.cn/apache/flume/1.9.0/apache-flume-1.9.0-bin.tar.gz<br />
+tar -zxvf apache-flume-1.9.0-bin.tar.gz&nbsp;<br />
+<br />
+vi /root/apache-flume-1.9.0-bin/conf/kafka-producer.conf<br />
+pro.sources = s1<br />
+pro.channels = c1<br />
+pro.sinks = k1<br />
+<br />
+pro.sources.s1.type = exec<br />
+pro.sources.s1.command = tail -F /root/flumetest.txt<br />
+<br />
+pro.channels.c1.type = memory<br />
+pro.channels.c1.capacity = 1000<br />
+pro.channels.c1.transactionCapacity = 100<br />
+<br />
+pro.sinks.k1.type = org.apache.flume.sink.kafka.KafkaSink<br />
+pro.sinks.k1.kafka.topic = test<br />
+pro.sinks.k1.kafka.bootstrap.servers = 192.168.172.137:9092,192.168.172.138:9092,192.168.172.139:9092<br />
+pro.sinks.k1.kafka.flumeBatchSize = 20<br />
+pro.sinks.k1.kafka.producer.acks = 1<br />
+pro.sinks.k1.kafka.producer.linger.ms = 1<br />
+pro.sinks.k1.kafka.producer.compression.type = snappy<br />
+<br />
+pro.sources.s1.channels = c1<br />
+pro.sinks.k1.channel = c1<br />
+<br />
+<br />
+/root/apache-flume-1.9.0-bin/bin/flume-ng agent -n pro -c /root/apache-flume-1.9.0-bin/conf&nbsp; -f kafka-producer.conf<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

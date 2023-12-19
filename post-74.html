@@ -1,0 +1,91 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>HIVE与sentry权限控制 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>HIVE与sentry权限控制</h1>
+
+	<div class="text">HDFS<br />
+<a target="_blank" href="https://lijiahong.com/e8781587973028.png" id="ematt:55"><img src="https://lijiahong.com/e8781587973028.png" title="点击查看原图" alt="HDFS.png" border="0" width="507" height="173" /></a><br />
+HUE<br />
+<a target="_blank" href="https://lijiahong.com/bf3b1587973048.png" id="ematt:57"><img src="https://lijiahong.com/bf3b1587973048.png" title="点击查看原图" alt="HUE.png" border="0" width="488" height="156" /></a><br />
+IMPALA<br />
+<a target="_blank" href="https://lijiahong.com/171f1587973069.png" id="ematt:59"><img src="https://lijiahong.com/171f1587973069.png" title="点击查看原图" alt="IMPALA.png" border="0" width="475" height="128" /></a><br />
+HIVE<br />
+<p>
+	<a target="_blank" href="https://lijiahong.com/15621587973101.png" id="ematt:61"><img src="https://lijiahong.com/15621587973101.png" title="点击查看原图" alt="HIVE1.png" border="0" width="558" height="144" /></a><a target="_blank" href="https://lijiahong.com/59661587973101.png" id="ematt:63"><img src="https://lijiahong.com/59661587973101.png" title="点击查看原图" alt="HIVE2.png" border="0" width="557" height="109" /></a> 
+</p>
+<p>
+	<a target="_blank" href="https://lijiahong.com/ed881587973101.png" id="ematt:65"></a><a target="_blank" href="https://lijiahong.com/f8031598326050.png" id="ematt:67"><img src="https://lijiahong.com/f8031598326050.png" title="点击查看原图" alt="微信截图_20200825112618.png" border="0" width="619" height="99" /></a><img src="https://lijiahong.com/ed881587973101.png" title="点击查看原图" alt="HIVE3.png" border="0" width="960" height="575" /> 
+</p>
+<br />
+1.使用beeline连接HiveServer2，并登录hive用户<br />
+beeline<br />
+!connect jdbc:hive2://你的主机名:10000 hive hive<br />
+<br />
+2.创建bigdata角色<br />
+create role bigdata;<br />
+<br />
+3.为角色赋予超级权限<br />
+grant all on server server1 to role admin;<br />
+grant select on server server1 to role bigdata;<br />
+grant select on server server1 to role impala;<br />
+grant create on server server1 to role bigdata;<br />
+<br />
+4.将角色授权给各个用户组<br />
+grant role admin to group hive; --hive用户组有admin权限<br />
+grant role impala to group impala;--impala用户组有查询权限<br />
+grant role bigdata to group bigdata;--bigdata用户组有查询和创建权限。<br />
+<br />
+<br />
+这样之后在Hue中新建用户和组bigdata，新建用户和组hive。各自分配好Hue的访问权限，如bigdata可访问impala和hive<br />
+<br />
+hive为管理员权限，这样bigdata登录Hue就不怕误删hive中非bigdata所建的表了；<br />
+<br />
+Hue机器上记得添加新用户bigdata 所属组为bigdata<br />
+<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

@@ -1,0 +1,66 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Linux中增加swap空间 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Linux中增加swap空间</h1>
+
+	<div class="text">在root用户下进行，首先先建立一个分区，采用dd命令比如<br />
+<br />
+dd if=/dev/zero of=/home/swap bs=1024 count=512000<br />
+这样就会创建/home/swap这么一个分区文件。文件的大小是512000个block，一般情况下1个block为1K，所以这里空间是512M。接着再把这个分区变成swap分区。<br />
+<br />
+/sbin/mkswap /home/swap<br />
+再接着使用这个swap分区。使其成为有效状态。<br />
+<br />
+/sbin/swapon /home/swap<br />
+现在再用free -m命令查看一下内存和swap分区大小，就发现增加了512M的空间了。<br />
+<br />
+需要修改/etc/fstab文件，增加如下一行<br />
+/home/swap &nbsp; &nbsp;swap &nbsp; &nbsp; swap &nbsp; &nbsp;defaults &nbsp; &nbsp; &nbsp; &nbsp;0 0<br />
+自动启动以后swap空间也增大了。<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

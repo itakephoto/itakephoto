@@ -1,0 +1,72 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Linux使用rpm包安装MySQL - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Linux使用rpm包安装MySQL</h1>
+
+	<div class="text"><strong>（1）下载安装包</strong><br />
+<pre class="prettyprint lang-bsh linenums">MySQL-server-5.5.51-1.rhel5.i386.rpm
+MySQL-client-5.5.51-1.rhel5.i386.rpm
+MySQL-devel-5.5.51-1.rhel5.i386.rpm</pre>
+<strong>（2）开始安装</strong><br />
+<pre class="prettyprint lang-bsh linenums">#rpm -ivh MySQL*.rpm</pre>
+<strong>（3）查看端口占用</strong><br />
+<pre class="prettyprint lang-bsh linenums">#netstat -nat</pre>
+<strong>（4）启动，停止MySQL</strong> 
+<pre class="prettyprint lang-bsh linenums">#service mysql stop; 
+#service mysql start; </pre>
+<strong>（5）设置root用户密码</strong><br />
+<pre class="prettyprint lang-bsh linenums">#mysql -u root
+#mysql&gt; SET PASSWORD FOR 'root'@'localhost' = PASSWORD('newpass');</pre>
+<strong>（6）设置运行远程连接&nbsp;</strong> 
+<pre class="prettyprint lang-bsh linenums">#mysql&gt;GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY '123456' WITH GRANT OPTION;
+#mysql&gt;FLUSH  PRIVILEGES;
+#mysql&gt;CREATE DATABASE db_name DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+#mysql&gt;CREATE DATABASE db_name DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+</pre></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

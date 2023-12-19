@@ -1,0 +1,98 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>【转】Greenplum segment 锁处理 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>【转】Greenplum segment 锁处理</h1>
+
+	<div class="text"><pre>
+最近遇到truncate表，无法清理的情况，在master节点查看加锁情况，并未加锁 
+这种情况极有可能是segment节点相关表加了锁，所以遇到这种情况除了排查master节点的锁，
+所有的segment也要查看锁的持有情况，然后根据情况，进行处理。
+
+master节点： 
+查看segment锁情况 
+select gp_execution_dbid(), pid, relation::regclass, locktype, mode, granted   
+from gp_dist_random('pg_locks');
+
+查看具体什么语句持有的锁 
+select gp_execution_dbid() dbid,procpid,current_query ​
+from gp_dist_random('pg_stat_activity')    
+where procpid in    
+(select pid from gp_dist_random('pg_locks') where locktype='relation' and mode='ExclusiveLock');
+通过以上语句大概定位到持有锁的segment
+
+segment节点： 
+根据实际情况进行处理 
+1.连接相关segment,xxxx替换为实际segment节点的ip,端口，库名 
+PGOPTIONS="-c gp_session_role=utility" psql -h xxxxxxxxx -p xxxx -d  xxxxx
+
+2.在segment查询相关锁情况 
+SELECT 
+w.current_query as waiting_query, 
+w.procpid as w_pid, 
+w.usename as w_user, 
+l.current_query as locking_query, 
+l.procpid as l_pid, 
+l.usename as l_user, 
+t.schemaname || '.' || t.relname as tablename 
+from pg_stat_activity w 
+join pg_locks l1 on w.procpid = l1.pid and not l1.granted 
+join pg_locks l2 on l1.relation = l2.relation and l2.granted 
+join pg_stat_activity l on l2.pid = l.procpid 
+join pg_stat_user_tables t on l1.relation = t.relid 
+where w.waiting;
+
+3.处理持有锁的pid 
+select pg_terminate_backend('procpid');
+select pg_terminate_backend(310252); 
+select pg_cancel_backend(308045);
+select procpid from pg_stat_activity where DATNAME = 'BI_DW'; 
+Linux命令：kill -9 procpid
+</pre>
+​</div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

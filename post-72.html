@@ -1,0 +1,72 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hive表行列分隔符与sqoop对应 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Hive表行列分隔符与sqoop对应</h1>
+
+	<div class="text"><p>
+	<br />
+CREATE TABLE TEST(<br />
+T_ID INT,<br />
+T_NAME STRING<br />
+)&nbsp; <br />
+ROW FORMAT DELIMITED FIELDS TERMINATED BY '\t' <br />
+LINES TERMINATED BY '\n'<br />
+STORED AS TEXTFILE <br />
+LOCATION '/DATA/TEST';
+</p>
+<p>
+	<br />
+</p>
+<p>
+	hive，sqoop分隔符可以按以下表选择：
+</p>
+<p>
+	<a id="ematt:53" href="https://lijiahong.com/43781587696061.png" target="_blank"><img width="588" height="472" title="点击查看原图" alt="微信图片_20200424102500.png" src="https://lijiahong.com/43781587696061.png" border="0" /></a>
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

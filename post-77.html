@@ -1,0 +1,82 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Impala刷新元数据和刷新表 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Impala刷新元数据和刷新表</h1>
+
+	<div class="text">使用方式<br />
+invalidate metadata是用于刷新全库或者某个表的元数据，包括表的元数据和表内的文件数据，它会首先清楚表的缓存，然后从metastore中重新加载全部数据并缓存，该操作代价比较重，主要用于在hive中修改了表的元数据，需要同步到impalad，例如create table/drop table/alter table add columns等。<br />
+<br />
+invalidate metadata&nbsp; &nbsp;语法：<br />
+<br />
+invalidate metadata&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //重新加载所有库中的所有表<br />
+invalidate metadata [table]&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; //重新加载指定的某个表<br />
+refresh是用于刷新某个表或者某个分区的数据信息，它会重用之前的表元数据，仅仅执行文件刷新操作，它能够检测到表中分区的增加和减少，主要用于表中元数据未修改，数据的修改，例如insert into、load data、alter table add partition、llter table drop partition等，如果直接修改表的hdfs文件（增加、删除或者重命名）也需要指定refresh刷新数据信息。<br />
+<br />
+refresh 语法：<br />
+<br />
+refresh [table]&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;//刷新某个表<br />
+refresh [table] partition [partition]&nbsp; &nbsp; &nbsp; &nbsp;//刷新某个表的某个分区<br />
+使用原则<br />
+如果在使用过程中涉及到了元数据或者数据的更新，则需要使用这两者中的一个操作完成，具体如何选择需要根据如下原则：<br />
+<br />
+invalidate metadata操作比refresh要重量级<br />
+如果涉及到表的schema改变，使用invalidate metadata [table]<br />
+如果只是涉及到表的数据改变，使用refresh [table]<br />
+如果只是涉及到表的某一个分区数据改变，使用refresh [table] partition [partition]<br />
+禁止使用invalidate metadata什么都不加，宁愿重启catalogd。<br />
+<br />
+<br />
+<br />
+<br />
+分析表：<br />
+COMPUTE STATS usermodel_inter_total_info;<br />
+show table stats usermodel_inter_total_label;<br />
+show column stats usermodel_inter_total_label;<br />
+<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

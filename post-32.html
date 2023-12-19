@@ -1,0 +1,84 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>阿里云上CentOS7的Apache启动https - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>阿里云上CentOS7的Apache启动https</h1>
+
+	<div class="text">1：到阿里云控制台上申请证书<br />
+控制台-CA证书服务-购买证书<br />
+<br />
+2：安装openssl<br />
+yum install mod_ssl openssl<br />
+<br />
+3：新建文件夹，存放证书key<br />
+mkdir -p /etc/httpd/ssl<br />
+并且将阿里云的证书文件上传到此目录<br />
+<br />
+4：修改/etc/httpd/conf.d/ssl.conf&nbsp;<br />
+在&lt;VirtualHost _default_:443&gt;后面添加内容<br />
+DocumentRoot "/var/www/html/https"<br />
+ServerName www.lijiahong.com:443<br />
+<br />
+<br />
+# 添加 SSL 协议支持协议，去掉不安全的协议<br />
+SSLProtocol all -SSLv2 -SSLv3<br />
+# 修改加密套件如下<br />
+SSLCipherSuite HIGH:!RC4:!MD5:!aNULL:!eNULL:!NULL:!DH:!EDH:!EXP:+MEDIUM<br />
+SSLHonorCipherOrder on<br />
+# 证书公钥配置<br />
+SSLCertificateFile /etc/httpd/ssl/2492434_lijiahong.cn_public.crt<br />
+# 证书私钥配置<br />
+SSLCertificateKeyFile/etc/httpd/ssl/2492434_lijiahong.cn.key<br />
+# 证书链配置，如果该属性开头有 '#'字符，请删除掉<br />
+SSLCertificateChainFile /etc/httpd/ssl//chain.pem<br />
+<br />
+5：重启apache<br />
+systemctl restart httpd.service<br />
+<br />
+6：访问https://www.lijiahong.com:443<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

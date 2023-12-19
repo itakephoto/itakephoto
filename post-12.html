@@ -1,0 +1,71 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>阿里云上CentOS6的LAMP环境 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>阿里云上CentOS6的LAMP环境</h1>
+
+	<div class="text">1.安装需要的包，有依赖关系，自动帮你解决<br />
+yum install httpd mysql mysql-server php php-gd php-mbstring php-mysql<br />
+&nbsp;<br />
+2.启动httpd<br />
+service httpd start<br />
+3.设为开机启动<br />
+chkconfig httpd on<br />
+&nbsp;<br />
+4.启动mysqld<br />
+service mysqld start<br />
+5.设为开机启动<br />
+chkconfig mysqld on<br />
+&nbsp;<br />
+6.创建一个测试文件，写个phpinfo函数<br />
+vi /var/www/html/phpinfo.php<br />
+打开浏览器，输入http://ip/phpinfo.php，就可以看到phpinfo的输出页面了
+<p>
+	<br />
+</p></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    

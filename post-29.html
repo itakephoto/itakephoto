@@ -1,0 +1,73 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>MySQL基本导入导出操作 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>MySQL基本导入导出操作</h1>
+
+	<div class="text"><strong>一：导出</strong><br />
+<em><strong>(1)导出整个数据库中的所有数据</strong></em><br />
+mysqldump -u userName -p&nbsp; dabaseName&nbsp; &gt; fileName.sql<br />
+<br />
+<strong><em>(2)导出数据库中的某个表的数据</em></strong><br />
+mysqldump -u userName -p&nbsp; dabaseName tableName &gt; fileName.sql&nbsp;<br />
+<br />
+<em><strong>(3)导出整个数据库中的所有的表结构</strong></em><br />
+mysqldump -u userName -p -d dabaseName&nbsp; &gt; fileName.sql<br />
+<br />
+<strong><em>(4)导出整个数据库中某个表的表结构</em></strong><br />
+mysqldump -u userName -p -d dabaseName tableName &gt; fileName.sql<br />
+<br />
+<br />
+<strong>二：导入</strong><br />
+<em><strong>(1)方法1</strong></em><br />
+#mysql -uroot -p 回车&nbsp; 输入密码<br />
+sql&gt;source fileName.sql<br />
+<br />
+<strong><em>(2)方法2</em></strong><br />
+#mysql -uroot -p database &lt; fileName.sql<br /></div>
+
+	</div>
+
+</div>
+﻿</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
+
+
+    
