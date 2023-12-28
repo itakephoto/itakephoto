@@ -1,0 +1,268 @@
+
+    
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>阿里云上CentOS的安装VNC图形访问 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Greenplum7在Linux8上安装</h1>
+
+	<div class="text"><strong>1. 环境要求</strong><br />
+Greenplum 7 要求的操作系统为：<br />
+Red Hat Enterprise Linux 64-bit 8.7 or later<br />
+Oracle Linux 64-bit 8.7 or later, using the Red Hat Compatible Kernel (RHCK)<br />
+Rocky Linux 8.7 or later<br />
+需要安装以下依赖：<br />
+<p>
+	yum install apr apr-util bash bzip2 curl krb5 libcgroup-tools libcurl libevent libxml2 libyaml zlib openldap openssh-clients openssl openssl-libs perl python39 readline rsync R sed tar zip
+</p>
+<p>
+	<strong>2. 系统准备</strong><br />
+<strong>1.关闭selinux和防火墙</strong><br />
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/' /etc/selinux/config<br />
+systemctl stop firewalld<br />
+systemctl disable firewalld<br />
+setenforce 0<br />
+reboot<br />
+也可以使用命令行直接操作，个人习惯而已。<br />
+<br />
+<strong>2.配置系统文件</strong><br />
+<strong>2.1 主机文件</strong><br />
+# vi /etc/hosts<br />
+10.201.14.1&nbsp; &nbsp; mdw<br />
+10.201.14.2&nbsp; &nbsp; sdw1<br />
+10.201.14.3&nbsp; &nbsp; sdw2<br />
+10.201.14.4&nbsp; &nbsp; sdw4<br />
+<br />
+<strong>2.2 配置sysctl.conf</strong><br />
+首先使用以下命令，查询配置值：<br />
+$ echo $(expr $(getconf _PHYS_PAGES) / 2)&nbsp;<br />
+$ echo $(expr $(getconf _PHYS_PAGES) / 2 \* $(getconf PAGE_SIZE))<br />
+以本次主机配置，得出的值分别为：<br />
+65908170<br />
+269959864320<br />
+基本以上数值，配置sysctl.conf如下（注意最后一行是关于核心转储的配置）：<br />
+<br />
+kernel.shmall = 65908170<br />
+# kernel.shmmax = kernel.shmall * PAGE_SIZE<br />
+kernel.shmmax = 269959864320<br />
+kernel.shmmni = 4096<br />
+vm.overcommit_memory = 2 # See Segment Host Memory<br />
+vm.overcommit_ratio = 95 # See Segment Host Memory<br />
+net.ipv4.ip_local_port_range = 10000 65535 # See Port Settings<br />
+kernel.sem = 250 2048000 200 8192<br />
+kernel.sysrq = 1<br />
+kernel.core_uses_pid = 1<br />
+kernel.msgmnb = 65536<br />
+kernel.msgmax = 65536<br />
+kernel.msgmni = 2048<br />
+net.ipv4.tcp_syncookies = 1<br />
+net.ipv4.conf.default.accept_source_route = 0<br />
+net.ipv4.tcp_max_syn_backlog = 4096<br />
+net.ipv4.conf.all.arp_filter = 1<br />
+net.ipv4.ipfrag_high_thresh = 41943040<br />
+net.ipv4.ipfrag_low_thresh = 31457280<br />
+net.ipv4.ipfrag_time = 60<br />
+net.core.netdev_max_backlog = 10000<br />
+net.core.rmem_max = 2097152<br />
+net.core.wmem_max = 2097152<br />
+vm.swappiness = 10<br />
+vm.zone_reclaim_mode = 0<br />
+vm.dirty_expire_centisecs = 500<br />
+vm.dirty_writeback_centisecs = 100<br />
+vm.dirty_background_ratio = 0 # See System Memory<br />
+vm.dirty_ratio = 0<br />
+vm.dirty_background_bytes = 1610612736<br />
+vm.dirty_bytes = 4294967296<br />
+kernel.core_pattern=/var/core/core.%h.%t<br />
+<br />
+<strong>2.3 配置资源限制/etc/security/limits.conf(最后一行是关于核心转储)</strong><br />
+* soft nofile 524288<br />
+* hard nofile 524288<br />
+* soft nproc 131072<br />
+* hard nproc 131072<br />
+* soft&nbsp; core unlimited<br />
+<br />
+完成后执行以下命令使配置生效：<br />
+sysctl -p
+</p>
+<p>
+	<br />
+<strong>2.4 XFS 加载选项</strong><br />
+Greenplum 数据存储使用XFS文档格式。可以安装操作系统时就配置好，也可完成后加载磁盘即可：<br />
+mkdir /gpdata<br />
+格式化磁盘：<br />
+mkfs.xfs -f /dev/sdb<br />
+配置/etc/fstab文件<br />
+/dev/sdb&nbsp; &nbsp; &nbsp;/gpdata&nbsp; &nbsp; &nbsp; xfs&nbsp; &nbsp; &nbsp;nodev,noatime,inode64 0 0<br />
+完成后执行以下命令检测是否正确。如无任何提示，则表示配置正确。否则应即时排查，以避免系统重启失败。<br />
+mount -a<br />
+<br />
+<strong>2.5 文件 I/O配置</strong><br />
+修改/etc/rc.d/rc.local文件，添加以下内容：<br />
+/sbin/blockdev --setra 32768 /dev/sdb
+</p>
+<p>
+	完成后执行<br />
+chmod +x /etc/rc.d/rc.local
+</p>
+<p>
+	<br />
+<strong>2.5 磁盘I/O调度程序</strong><br />
+本次使用Red Hat 8.8, SSD硬盘，因此配置为：<br />
+# grubby --update-kernel=ALL --args="elevator=none"<br />
+完成后，重启系统生效。<br />
+<br />
+<strong>2.5 禁用透明大页</strong><br />
+# grubby --update-kernel=ALL --args="transparent_hugepage=never"<br />
+<br />
+<strong>2.6 IPC对象删除</strong><br />
+修改/etc/systemd/logind.conf<br />
+RemoveIPC=no<br />
+完成后重启系统生效<br />
+service systemd-logind restart<br />
+<br />
+<strong>2.7 修改SSH连接阀值/etc/ssh/sshd_config</strong><br />
+MaxStartups 100:30:500<br />
+MaxSessions 200<br />
+完成后执行以下命令使配置生效<br />
+service sshd restart<br />
+<br />
+<strong>2.8 同步系统时钟 - 此处略</strong><br />
+<strong>3.安装Greenplum 7</strong><br />
+<strong>3.1 配置用户</strong><br />
+# groupadd gpadmin<br />
+# useradd gpadmin -r -m -g gpadmin<br />
+# passwd gpadmin<br />
+New password: &lt;changeme&gt;<br />
+Retype new password: &lt;changeme&gt;<br />
+<br />
+<strong>3.2 切换到gpadmin用户，生成ssh密钥</strong><br />
+$ su gpadmin<br />
+$ ssh-keygen -t rsa -b 4096<br />
+Generating public/private rsa key pair.<br />
+Enter file in which to save the key (/home/gpadmin/.ssh/id_rsa):<br />
+Created directory '/home/gpadmin/.ssh'.<br />
+Enter passphrase (empty for no passphrase):<br />
+Enter same passphrase again:<br />
+<br />
+<strong>3.3 向用户gpadmin授予 sudo 访问权限(生产环境可以不做此步骤)。</strong><br />
+$ vi /etc/sudoers<br />
+%wheel&nbsp; &nbsp; &nbsp; &nbsp; ALL=(ALL)&nbsp; &nbsp; &nbsp; &nbsp;NOPASSWD: ALL<br />
+使用此命令将用户gpadmin添加到组wheel。<br />
+# usermod -aG wheel gpadmin<br />
+<br />
+<strong>3.4 安装Greenplum 7</strong><br />
+$ sudo yum install ./greenplum-db-7.0.0-beta.5-el8-x86_64.rpm<br />
+完成后，授权以下目录给gpadmin<br />
+$ sudo chown -R gpadmin:gpadmin /usr/local/greenplum*<br />
+$ sudo chgrp -R gpadmin /usr/local/greenplum*<br />
+$ sudo chown -R gpadmin:gpadmin /gpdata<br />
+<br />
+<strong>3.5 配置免密登录</strong><br />
+登录为gpadmin<br />
+$ su - gpadmin<br />
+$ source /usr/local/greenplum-db-7.0.0/greenplum_path.sh<br />
+使用以下命令将用户gpadmin的公钥添加到群集中所有其他主机上<br />
+$ ssh-copy-id mdw<br />
+$ ssh-copy-id sdw1<br />
+$ ssh-copy-id sdw2<br />
+$ ssh-copy-id sdw3<br />
+<br />
+编写一个主机清单(本次服务器硬件较好，因此计划将所有主机均配置为Data Segment，以充分利用资源)<br />
+$ vi all_host<br />
+mdw<br />
+sdw1<br />
+sdw2<br />
+sdw3<br />
+然后执行：<br />
+$ gpssh-exkeys -f hostfile_exkeys
+</p>
+<p>
+	<br />
+配置存储空间：<br />
+在mdw主机上，创建coordinator目录<br />
+$ mkdir -p /gpdata/coordinator<br />
+<br />
+在所有主机上，创建数据存储目录<br />
+$ gpssh-ssh -f all_seg<br />
+&gt; mkdir -p /gpdata/primary<br />
+&gt; mkdir -p /gpdata/mirror<br />
+<br />
+初始化数据库：<br />
+$ cp $GPHOME/docs/cli_help/gpconfigs/gpinitsystem_config &nbsp;/home/gpadmin/gpconfigs/gpinitsystem_config <br />
+$ vi gpconfigs/gpinitsystem_config<br />
+SEG_PREFIX=gpseg<br />
+PORT_BASE=6000&nbsp;<br />
+declare -a DATA_DIRECTORY=(/gpdata/primary /gpdata/primary /gpdata/primary /gpdata/primary /gpdata/primary /gpdata/primary /gpdata/primary /gpdata/primary /gpdata/primary /gpdata/primary)<br />
+COORDINATOR_HOSTNAME=mdw&nbsp;<br />
+COORDINATOR_DIRECTORY=/data/coordinator&nbsp;<br />
+COORDINATOR_PORT=5432&nbsp;<br />
+TRUSTED SHELL=ssh<br />
+CHECK_POINT_SEGMENTS=8<br />
+ENCODING=UNICODE<br />
+<br />
+完成后，执行以下命令初始化：<br />
+<br />
+$ cd ~<br />
+$ gpinitsystem -c gpconfigs/gpinitsystem_config -h all_seg -y<br />
+完成后，显示以下内容即为成功初始化<br />
+=&gt; Greenplum Database instance successfully created.<br />
+<br />
+最后一步，配置greenplum参数<br />
+<br />
+复制&nbsp;<br />
+$ vi ~/.bashrc<br />
+source /usr/local/greenplum-db/greenplum_path.sh<br />
+export COORDINATOR_DATA_DIRECTORY=/gpdata/coordinator/gpseg-1<br />
+export PGPORT=5432<br />
+export PGUSER=gpadmin<br />
+export PGDATABASE=gpadmin<br />
+export LD_PRELOAD=/lib64/libz.so.1 ps<br />
+<br />
+<br />
+完成后，source ~/.bashrc使配置生效即可。<br />
+-----------------------------------<br />
+&copy;著作权归作者所有：来自51CTO博客作者greenbeam的原创作品，请联系作者获取转载授权，否则将追究法律责任<br />
+Greenplum 7 Beta 5 安装及问题<br />
+https://blog.51cto.com/u_1264026/7056925<br />
+</p></div>
+
+	</div>
+
+</div>
+</div>
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
