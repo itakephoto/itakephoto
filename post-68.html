@@ -32,249 +32,490 @@
 <div id="content">
 <div id="main_page">
 <div id="article">
-	<h1>【hadoop】Container is running beyond virtual memory limits</h1>
+	<h1>Container is running beyond virtual memory limits</h1>
 
-	<div class="text"><strong>异常显示</strong><br />
-Container [pid=100287,containerID=container_1513249052998_0007_01_000009] is&nbsp;<br />
-running beyond virtual memory limits. Current usage: 611.1 MB of 1 GB physical<br />
-memory used; 4.9 GB of 3 GB virtual memory used. Killing container.<br />
-<br />
-<strong>异常分析</strong><br />
-611.1MB: 任务所占的物理内存<br />
-1GB 是mapreduce.map.memory.mb 设置的<br />
-4.9G 是程序占用的虚拟内存： 什么是虚拟内存以及和物理内存的关系<br />
-3GB 是mapreduce.map.memory.db 乘以 yarn.nodemanager.vmem-pmem-ratio 得到的<br />
-其中yarn.nodemanager.vmem-pmem-ratio 是 虚拟内存和物理内存比例，在yarn-site.xml中设置，默认是2.1, 由于我本地设置的是3， 所以 1*3 = 3GB<br />
-很明显，container占用了4.9G的虚拟内存，但是分配给container的却只有3GB。所以kill掉了这个container<br />
-上面只是map中产生的报错，当然也有可能在reduce中报错，如果是reduce中，那么就是mapreduce.reduce.memory.db * yarn.nodemanager.vmem-pmem-ratio<br />
-<br />
-<strong>解决办法：（1）修改mapred-site.xml</strong><br />
-&lt;property&gt;<br />
-&nbsp; &nbsp; &nbsp; &lt;name&gt;mapreduce.map.memory.mb&lt;/name&gt;<br />
-&lt;value&gt;1536&lt;/value&gt;<br />
-&lt;/property&gt;<br />
-&lt;property&gt;<br />
-&nbsp; &nbsp; &nbsp; &lt;name&gt;mapreduce.map.java.opts&lt;/name&gt;<br />
-&nbsp; &nbsp; &nbsp; &lt;value&gt;-Xmx1024M&lt;/value&gt;<br />
-&lt;/property&gt;<br />
-&lt;property&gt;<br />
-&nbsp; &nbsp; &nbsp; &lt;name&gt;mapreduce.reduce.memory.mb&lt;/name&gt;<br />
-&nbsp; &nbsp; &nbsp; &lt;value&gt;3072&lt;/value&gt;<br />
-&lt;/property&gt;<br />
-&lt;property&gt;<br />
-&nbsp; &nbsp; &nbsp; &lt;name&gt;mapreduce.reduce.java.opts&lt;/name&gt;<br />
-&nbsp; &nbsp; &nbsp; &lt;value&gt;-Xmx2560M&lt;/value&gt;<br />
-&lt;/property&gt;<br />
-<br />
-<strong>解决办法：（2）修改yarn-site.xml</strong><br />
-&lt;property&gt;<br />
-&nbsp; &nbsp; &nbsp; &lt;name&gt;yarn.nodemanager.vmem-pmem-ratio&lt;/name&gt;<br />
-&nbsp; &nbsp; &nbsp; &lt;value&gt;2.5&lt;/value&gt;<br />
-&lt;/property&gt;<br />
-<br />
-<strong>附录</strong><br />
-<table cellspacing="0" cellpadding="0" border="1" style="border-top:1px solid #EEEEEE;border-left:1px solid #EEEEEE;line-height:25px;text-align:center;color:#333333;">
-	<tbody>
-		<tr>
-			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">参数名称</span></span>
-			</td>
-			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">缺省值</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">说明</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.job.name</span></span>
-			</td>
-			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;"><br />
-</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">作业名称</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.job.priority</span></span>
-			</td>
-			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">NORMAL</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">作业优先级</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">yarn.app.mapreduce.am.resource.mb</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">1536</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">MR ApplicationMaster占用的内存量</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">yarn.app.mapreduce.am.resource.cpu-vcores</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">1</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">MR ApplicationMaster占用的虚拟CPU个数</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.am.max-attempts</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">2</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">MR ApplicationMaster最大失败尝试次数</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.memory.mb</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">1024</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">每个Map Task需要的内存量</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.cpu.vcores</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">1</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">每个Map Task需要的虚拟CPU个数</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.maxattempts</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">4</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">Map Task最大失败尝试次数</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.memory.mb</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">1024</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">每个Reduce Task需要的内存量</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.cpu.vcores</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">1</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">每个Reduce Task需要的虚拟CPU个数</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.maxattempts</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">4</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">Reduce Task最大失败尝试次数</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.speculative</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">false</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">是否对Map Task启用推测执行机制</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.speculative</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">false</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">是否对Reduce Task启用推测执行机制</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.job.queuename</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">default</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">作业提交到的队列</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.task.io.sort.mb</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">100</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">任务内部排序缓冲区大小</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.sort.spill.percent</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">0.8</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">Map阶段溢写文件的阈值（排序缓冲区大小的百分比）</span></span>
-			</td>
-		</tr>
-		<tr>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.shuffle.parallelcopies</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">5</span></span>
-			</td>
-			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
-				<span style="font-family:SimSun;"><span style="font-size:12px;">Reduce Task启动的并发拷贝数据的线程数目</span></span>
-			</td>
-		</tr>
-	</tbody>
+	<div class="text"><strong>异常显示</strong><br />
+
+Container [pid=100287,containerID=container_1513249052998_0007_01_000009] is&nbsp;<br />
+
+running beyond virtual memory limits. Current usage: 611.1 MB of 1 GB physical<br />
+
+memory used; 4.9 GB of 3 GB virtual memory used. Killing container.<br />
+
+<br />
+
+<strong>异常分析</strong><br />
+
+611.1MB: 任务所占的物理内存<br />
+
+1GB 是mapreduce.map.memory.mb 设置的<br />
+
+4.9G 是程序占用的虚拟内存： 什么是虚拟内存以及和物理内存的关系<br />
+
+3GB 是mapreduce.map.memory.db 乘以 yarn.nodemanager.vmem-pmem-ratio 得到的<br />
+
+其中yarn.nodemanager.vmem-pmem-ratio 是 虚拟内存和物理内存比例，在yarn-site.xml中设置，默认是2.1, 由于我本地设置的是3， 所以 1*3 = 3GB<br />
+
+很明显，container占用了4.9G的虚拟内存，但是分配给container的却只有3GB。所以kill掉了这个container<br />
+
+上面只是map中产生的报错，当然也有可能在reduce中报错，如果是reduce中，那么就是mapreduce.reduce.memory.db * yarn.nodemanager.vmem-pmem-ratio<br />
+
+<br />
+
+<strong>解决办法：（1）修改mapred-site.xml</strong><br />
+
+&lt;property&gt;<br />
+
+&nbsp; &nbsp; &nbsp; &lt;name&gt;mapreduce.map.memory.mb&lt;/name&gt;<br />
+
+&lt;value&gt;1536&lt;/value&gt;<br />
+
+&lt;/property&gt;<br />
+
+&lt;property&gt;<br />
+
+&nbsp; &nbsp; &nbsp; &lt;name&gt;mapreduce.map.java.opts&lt;/name&gt;<br />
+
+&nbsp; &nbsp; &nbsp; &lt;value&gt;-Xmx1024M&lt;/value&gt;<br />
+
+&lt;/property&gt;<br />
+
+&lt;property&gt;<br />
+
+&nbsp; &nbsp; &nbsp; &lt;name&gt;mapreduce.reduce.memory.mb&lt;/name&gt;<br />
+
+&nbsp; &nbsp; &nbsp; &lt;value&gt;3072&lt;/value&gt;<br />
+
+&lt;/property&gt;<br />
+
+&lt;property&gt;<br />
+
+&nbsp; &nbsp; &nbsp; &lt;name&gt;mapreduce.reduce.java.opts&lt;/name&gt;<br />
+
+&nbsp; &nbsp; &nbsp; &lt;value&gt;-Xmx2560M&lt;/value&gt;<br />
+
+&lt;/property&gt;<br />
+
+<br />
+
+<strong>解决办法：（2）修改yarn-site.xml</strong><br />
+
+&lt;property&gt;<br />
+
+&nbsp; &nbsp; &nbsp; &lt;name&gt;yarn.nodemanager.vmem-pmem-ratio&lt;/name&gt;<br />
+
+&nbsp; &nbsp; &nbsp; &lt;value&gt;2.5&lt;/value&gt;<br />
+
+&lt;/property&gt;<br />
+
+<br />
+
+<strong>附录</strong><br />
+
+<table cellspacing="0" cellpadding="0" border="1" style="border-top:1px solid #EEEEEE;border-left:1px solid #EEEEEE;line-height:25px;text-align:center;color:#333333;">
+
+	<tbody>
+
+		<tr>
+
+			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">参数名称</span></span>
+
+			</td>
+
+			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">缺省值</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">说明</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.job.name</span></span>
+
+			</td>
+
+			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;"><br />
+
+</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">作业名称</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.job.priority</span></span>
+
+			</td>
+
+			<td style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">NORMAL</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">作业优先级</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">yarn.app.mapreduce.am.resource.mb</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">1536</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">MR ApplicationMaster占用的内存量</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">yarn.app.mapreduce.am.resource.cpu-vcores</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">1</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">MR ApplicationMaster占用的虚拟CPU个数</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.am.max-attempts</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">2</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">MR ApplicationMaster最大失败尝试次数</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.memory.mb</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">1024</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">每个Map Task需要的内存量</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.cpu.vcores</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">1</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">每个Map Task需要的虚拟CPU个数</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.maxattempts</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">4</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">Map Task最大失败尝试次数</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.memory.mb</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">1024</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">每个Reduce Task需要的内存量</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.cpu.vcores</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">1</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">每个Reduce Task需要的虚拟CPU个数</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.maxattempts</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">4</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">Reduce Task最大失败尝试次数</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.speculative</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">false</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">是否对Map Task启用推测执行机制</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.speculative</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">false</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">是否对Reduce Task启用推测执行机制</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.job.queuename</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">default</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">作业提交到的队列</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.task.io.sort.mb</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">100</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">任务内部排序缓冲区大小</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.map.sort.spill.percent</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">0.8</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">Map阶段溢写文件的阈值（排序缓冲区大小的百分比）</span></span>
+
+			</td>
+
+		</tr>
+
+		<tr>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">mapreduce.reduce.shuffle.parallelcopies</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">5</span></span>
+
+			</td>
+
+			<td valign="top" style="border-right:1px solid #EEEEEE;border-bottom:1px solid #EEEEEE;">
+
+				<span style="font-family:SimSun;"><span style="font-size:12px;">Reduce Task启动的并发拷贝数据的线程数目</span></span>
+
+			</td>
+
+		</tr>
+
+	</tbody>
+
 </table></div>
 
 	</div>
