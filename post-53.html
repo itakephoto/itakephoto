@@ -72,11 +72,13 @@ Secondary NameNode简单的工作流程图
 2. 一旦它有了新的fsimage文件，它将其拷贝回NameNode中。
 3. NameNode在下次重启时会使用这个新的fsimage文件，从而减少重启的时间。
 4. Secondary NameNode的整个目的是在HDFS中提供一个检查点。它只是NameNode的一个助手节点。这也是它在社区内被认为是检查点节点的原因。
-5. 现在，我们明白了Secondary NameNode所做的不过是在文件系统中设置一个检查点来辅助NameNode更好的工作。它不是要取代掉NameNode也不是NameNode的备份。所以Secondary NameNode称为检查点节点。
+5. 现在，我们明白了Secondary NameNode所做的不过是在文件系统中设置一个检查点来辅助NameNode更好的工作。
+   它不是要取代掉NameNode也不是NameNode的备份。所以Secondary NameNode称为检查点节点。
  
 NameNode何时写到edit log中
 NameNode是什么时候将改动写到edit logs中的？
-这个步骤，实际上是由DataNode的写操作触发的，当我们往DataNode写文件时，DataNode会跟NameNode通信，告诉NameNode什么文件的第几个block放在它那里，NameNode这个时候会将这些元数据信息写到edit logs文件中。
+这个步骤，实际上是由DataNode的写操作触发的，当我们往DataNode写文件时，DataNode会跟NameNode通信，
+告诉NameNode什么文件的第几个block放在它那里，NameNode这个时候会将这些元数据信息写到edit logs文件中。
 </pre></div>
 
 	</div>
