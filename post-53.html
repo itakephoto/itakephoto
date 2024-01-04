@@ -40,7 +40,7 @@ NameNode主要是用来保存HDFS的元数据信息，比如命名空间信息�
 当它运行的时候，这些信息是存在内存中的。但是这些信息也可以持久化到磁盘上。
 NameNode存储元数据流程图
 </pre>
-<img width="749" height="429" title="点击查看原图" alt="1.jpg" src="https://lijiahong.com/f3cc1560435467.jpg" border="0" />
+<img width="749" height="429" title="点击查看原图" alt="1.jpg" src="https://lijiahong.com/content/f3cc1560435467.jpg" border="0" />
 <pre> 
 上图我们看到了NameNode如何把元数据保存到磁盘上的。这里有两个不同的文件：
 1. fsimage - 它是在NameNode启动时对整个文件系统的快照
@@ -65,7 +65,7 @@ Secondary NameNode
 SecondaryNameNode就是来帮助解决上述问题的，它的职责是合并NameNode的edit logs到fsimage文件中。
 Secondary NameNode简单的工作流程图
 </pre>
-<img width="867" height="462" title="点击查看原图" alt="2.jpg" src="https://lijiahong.com/15601560435476.jpg" border="0" />
+<img width="867" height="462" title="点击查看原图" alt="2.jpg" src="https://lijiahong.com/content/15601560435476.jpg" border="0" />
 <pre>
 上图我们看到了Secondary NameNode是怎样工作的。
 1. 首先，它定时到NameNode去获取edit logs，并更新到Secondary NameNode自己的fsimage上。
