@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Python通过endpoint传log到Log Analytics workspace - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	<li><a href="https://lijiahong.com/map.html">我的足迹</a></li>
+			<li class="common"><a href="https://lijiahong.com" >我的笔记</a></li>
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Python通过endpoint传log到Log Analytics workspace</h1>
+
+	<div class="text">
+<pre>
+pip install azure-monitor-ingestion
+pip install azure-identity
+
+
+# information needed to send data to the DCR endpoint
+dce_endpoint = "https://monitoring-poc-dce-01-xhvs.eastasia-1.ingest.monitor.azure.com" 
+# ingestion endpoint of the Data Collection Endpoint object
+dcr_immutableid = "dcr-1ceaafe3115746d8ab02232fd1d85343" # immutableId property of the Data Collection Rule
+stream_name = "Custom-PROJECT_INFO_02_CL" #name of the stream in the DCR that represents the destination table
+
+# Import required modules
+import os
+from azure.identity import ClientSecretCredential
+from azure.monitor.ingestion import LogsIngestionClient
+from azure.core.exceptions import HttpResponseError
+
+credential = ClientSecretCredential(
+    tenant_id="xxx",
+    client_id="xxx",
+    client_secret="sfk8Q~.ktZzwK_rsNLl-YICkk2EdbRtERIol~cWq"
+)
+client = LogsIngestionClient(endpoint=dce_endpoint, credential=credential, logging_enable=True)
+
+body = [
+        {
+            "ONBOARD_DATE": "2023-03-12T15:04:48.423211Z",
+            "PROJECT_ID": "10001",
+            "PROJECT_NAME":"test1",
+            "PROJECT_OWNER":"a1",
+            "ID01":"a000000001"
+        },
+        {
+            "ONBOARD_DATE": "2023-03-12T15:04:48.423211Z",
+            "PROJECT_ID": "10002",
+            "PROJECT_NAME":"test2",
+            "PROJECT_OWNER":"a2",
+            "ID01":"a000000001"
+        }
+    ]
+
+try:
+    client.upload(rule_id=dcr_immutableid, stream_name=stream_name, logs=body)
+except HttpResponseError as e:
+    print(f"Upload failed: {e}")
+
+</pre>
+    </div>
+ </div>
+  </div>
+   </div>
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+</div>
+</body>
+</html>
