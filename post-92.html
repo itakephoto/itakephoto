@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<title>Python通过endpoint传log到Log Analytics workspace - Lijiahong</title>
+<title>Python或Http通过endpoint传log到Log Analytics workspace - Lijiahong</title>
 <meta name="keywords" content="lijiahong" />
 <meta name="description" content="content" />
 <link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
@@ -31,9 +31,10 @@
 <div id="content">
 <div id="main_page">
 <div id="article">
-	<h1>Python通过endpoint传log到Log Analytics workspace</h1>
+	<h1>Python或Http通过endpoint传log到Log Analytics workspace</h1>
 
 	<div class="text">
+	<strong>1. Python</strong><br />
 <pre>
 pip install azure-monitor-ingestion
 pip install azure-identity
@@ -81,6 +82,11 @@ except HttpResponseError as e:
     print(f"Upload failed: {e}")
 
 </pre>
+<strong>2. Http</strong><br />
+<img src="https://lijiahong.com/content/92-1.png" />
+<img src="https://lijiahong.com/content/92-2.png" />
+<img src="https://lijiahong.com/content/92-3.png" />
+<img src="https://lijiahong.com/content/92-4.png" />
     </div>
  </div>
   </div>
