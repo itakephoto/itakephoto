@@ -1,0 +1,556 @@
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Azure Metric Batch API - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	
+			
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Azure Metric Batch API</h1>
+
+	<div class="text">
+  <pre>
+Rest API地址    
+https://learn.microsoft.com/en-us/rest/api/monitor/metrics-batch/batch?view=rest-monitor-2023-10-01&tabs=HTTP#code-try-0
+
+需要给SP subscriptions基本的Monitoring Reader权限
+
+endpoint : https://eastus.metrics.monitor.azure.com
+
+merticnames : cpu_percent,cpu_limit
+metricnamespace : Microsoft.Sql/servers/databases
+
+Body :  
+{
+  "resourceids": [
+    "/subscriptions/5a088000-0995-476d-9a7c-a27b1ddf4cfb/resourceGroups/RG-sqldb1/providers/Microsoft.Sql/servers/344704000sqlserver1/databases/344704000sqldb1"
+  ]
+}
+
+
+Body支持多个ResourceID
+
+其中metricnamespace和merticnames在Supported metrics with Azure Monitor
+https://learn.microsoft.com/en-us/azure/azure-monitor/reference/supported-metrics/metrics-index
+
+Sample Data：
+{
+  "values": [
+    {
+      "starttime": "2024-05-22T13:32:18Z",
+      "endtime": "2024-05-22T14:32:18Z",
+      "interval": "PT1M",
+      "value": [
+        {
+          "id": "/subscriptions/5a088000-0995-476d-9a7c-a27b1ddf4cfb/resourceGroups/RG-sqldb1/providers/Microsoft.Sql/servers/344704000sqlserver1/databases/344704000sqldb1/providers/Microsoft.Insights/metrics/cpu_percent",
+          "type": "Microsoft.Insights/metrics",
+          "name": {
+            "value": "cpu_percent",
+            "localizedValue": "CPU percentage"
+          },
+          "displayDescription": "CPU percentage",
+          "unit": "Percent",
+          "timeseries": [
+            {
+              "metadatavalues": [],
+              "data": [
+                {
+                  "timeStamp": "2024-05-22T13:32:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:33:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:34:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:35:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:36:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:37:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:38:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:39:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:40:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:41:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:42:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:43:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:44:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:45:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:46:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:47:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:48:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:49:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:50:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:51:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:52:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:53:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:54:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:55:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:56:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:57:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:58:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T13:59:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:00:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:01:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:02:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:03:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:04:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:05:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:06:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:07:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:08:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:09:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:10:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:11:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:12:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:13:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:14:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:15:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:16:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:17:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:18:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:19:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:20:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:21:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:22:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:23:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:24:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:25:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:26:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:27:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:28:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:29:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:30:00Z",
+                  "average": 0
+                },
+                {
+                  "timeStamp": "2024-05-22T14:31:00Z",
+                  "average": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "/subscriptions/5a088000-0995-476d-9a7c-a27b1ddf4cfb/resourceGroups/RG-sqldb1/providers/Microsoft.Sql/servers/344704000sqlserver1/databases/344704000sqldb1/providers/Microsoft.Insights/metrics/cpu_limit",
+          "type": "Microsoft.Insights/metrics",
+          "name": {
+            "value": "cpu_limit",
+            "localizedValue": "CPU limit"
+          },
+          "displayDescription": "CPU limit. Applies to vCore-based databases.",
+          "unit": "Count",
+          "timeseries": [
+            {
+              "metadatavalues": [],
+              "data": [
+                {
+                  "timeStamp": "2024-05-22T13:32:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:33:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:34:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:35:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:36:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:37:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:38:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:39:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:40:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:41:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:42:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:43:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T13:44:00Z",
+                  "average": 1
+                },
+                {
+                  "timeStamp": "2024-05-22T13:45:00Z",
+                  "average": 1.3333333333333333
+                },
+                {
+                  "timeStamp": "2024-05-22T13:46:00Z",
+                  "average": 1.6
+                },
+                {
+                  "timeStamp": "2024-05-22T13:47:00Z",
+                  "average": 1.6
+                },
+                {
+                  "timeStamp": "2024-05-22T13:48:00Z",
+                  "average": 1.3333333333333333
+                },
+                {
+                  "timeStamp": "2024-05-22T13:49:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:50:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:51:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:52:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:53:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:54:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:55:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:56:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:57:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:58:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T13:59:00Z",
+                  "average": 2
+                },
+                {
+                  "timeStamp": "2024-05-22T14:00:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:01:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:02:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:03:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:04:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:05:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:06:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:07:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:08:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:09:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:10:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:11:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:12:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:13:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:14:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:15:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:16:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:17:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:18:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:19:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:20:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:21:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:22:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:23:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:24:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:25:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:26:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:27:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:28:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:29:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:30:00Z"
+                },
+                {
+                  "timeStamp": "2024-05-22T14:31:00Z"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "namespace": "Microsoft.Sql/servers/databases",
+      "resourceregion": "eastus",
+      "resourceid": "/subscriptions/5a088000-0995-476d-9a7c-a27b1ddf4cfb/resourceGroups/RG-sqldb1/providers/Microsoft.Sql/servers/344704000sqlserver1/databases/344704000sqldb1"
+    }
+  ]
+}
+  </pre>
+    </div>
+ </div>
+  </div>
+   </div>
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+</div>
+</body>
+</html>
