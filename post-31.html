@@ -34,7 +34,7 @@
 <div id="article">
 	<h1>CentOS7.4安装python3.6.5</h1>
 
-	<div class="text">CentOS7.4默认安装的python为2.7版本，想更新成最新的3.6.5版本<br />
+	<div class="text">CentOS7.4默认安装的python为2.7版本，想更新成最新的3.6.5版本<br /><br />
 <strong>（1）升级安装系统包</strong><br />
 #&gt; yum install gcc gcc-c++<br />
 #&gt; yum install zlib-devel openssl-devel<br />
@@ -69,6 +69,7 @@ yum-builddep yum-debug-dump yumdownloader<br />
 <br />
 修改gnome-tweak-tool配置文件<br />
 # vi /usr/bin/gnome-tweak-tool<br />
+# vi /usr/bin/gnome-tweaks<br />
 #!/usr/bin/python 改为 #!/usr/bin/python2<br />
 <br />
 <br />
@@ -77,7 +78,16 @@ yum-builddep yum-debug-dump yumdownloader<br />
 #!/usr/bin/python 改为 #!/usr/bin/python2<br />
 <br />
 <strong>（5）查看python版本</strong><br />
-#&gt; python -V<br /></div>
+#&gt; python -V<br /><br />
+	
+<strong>（6）修改源</strong><br />	
+pip install apache-superset -i https://pypi.tuna.tsinghua.edu.cn/simple/<br />
+（1）阿里云 http://mirrors.aliyun.com/pypi/simple/<br />
+（2）豆瓣http://pypi.douban.com/simple/<br />
+（3）清华大学 https://pypi.tuna.tsinghua.edu.cn/simple/	<br />	
+（4）中国科学技术大学 http://pypi.mirrors.ustc.edu.cn/simple/<br />
+（5）华中科技大学http://pypi.hustunique.com/<br />
+	</div>
 
 	</div>
 
