@@ -34,42 +34,38 @@
 <div id="article">
 	<h1>Python使用Azure服务主体连接Azure SQL数据库</h1>
 
-	<div class="text"><pre>
-from azure.identity import ClientSecretCredential
-from adal.authentication_context import AuthenticationContext
-import struct
-import pyodbc
-
-
-_secret_scope = "oasis"
-_client_id = dbutils.secrets.get(_secret_scope, key="sp_client_id")
-_client_secret = dbutils.secrets.get(_secret_scope, key="sp_client_secret")
-_tenant_id = dbutils.secrets.get(_secret_scope, key="tenant_id")
-
-_credential = ClientSecretCredential(tenant_id=_tenant_id,client_id=_client_id,client_secret=_client_secret)
-
-auth_context = AuthenticationContext(f"https://login.microsoftonline.com/{_tenant_id}")
-result2 = auth_context.acquire_token_with_client_credentials("https://database.windows.net/",_client_id,_client_secret)
-
-token2 = result2["accessToken"]
-tokenb = bytes(token2, "UTF-8")
-
-exptoken = b''
-for i in tokenb:
-    exptoken += bytes({i})
-    exptoken += bytes(1)
-token_struct = struct.pack("=i", len(exptoken)) + exptoken
-
-connString = 'DRIVER={ODBC Driver 17 for SQL Server};SERVER=goazedsdb0018.database.windows.net;DATABASE=OASDSADATDSDB01;'
-conn = pyodbc.connect(connString, attrs_before = { 1256:token_struct});
-cursor = conn.cursor()
-query="select name from sys.databases"
-cursor.execute(query) 
-rows = cursor.fetchall()
-
-print(rows)
-
-
+	<div class="text"><pre>
+from azure.identity import ClientSecretCredential
+from adal.authentication_context import AuthenticationContext
+import struct
+import pyodbc
+
+_secret_scope = "oasis"
+_client_id = dbutils.secrets.get(_secret_scope, key="sp_client_id")
+_client_secret = dbutils.secrets.get(_secret_scope, key="sp_client_secret")
+_tenant_id = dbutils.secrets.get(_secret_scope, key="tenant_id")
+_credential = ClientSecretCredential(tenant_id=_tenant_id,client_id=_client_id,client_secret=_client_secret)
+
+auth_context = AuthenticationContext(f"https://login.microsoftonline.com/{_tenant_id}")
+result2 = auth_context.acquire_token_with_client_credentials("https://database.windows.net/",_client_id,_client_secret)
+token2 = result2["accessToken"]
+tokenb = bytes(token2, "UTF-8")
+
+exptoken = b''
+
+for i in tokenb:
+    exptoken += bytes({i})
+    exptoken += bytes(1)
+token_struct = struct.pack("=i", len(exptoken)) + exptoken
+
+connString = 'DRIVER={ODBC Driver 17 for SQL Server};SERVER=goasdb008.database.windows.net;DATABASE=OASDSATDB01;'
+conn = pyodbc.connect(connString, attrs_before = { 1256:token_struct});
+cursor = conn.cursor()
+query="select name from sys.databases"
+cursor.execute(query) 
+rows = cursor.fetchall()
+
+print(rows)
 </pre></div>
 
 	</div>
