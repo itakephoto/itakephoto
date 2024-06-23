@@ -34,7 +34,9 @@
 <div id="article">
 	<h1>使用yum安装MySQL5.7</h1>
 
-	<div class="text"><pre>wget -i -c http://dev.mysql.com/get/mysql57-community-release-el7-10.noarch.rpm
+	<div class="text"><pre>
+从mysql网站查找对应版本的yum源：https://dev.mysql.com/downloads/			
+wget -i -c http://dev.mysql.com/get/mysql57-community-release-el7-10.noarch.rpm
 yum -y install mysql57-community-release-el7-10.noarch.rpm
 yum -y install mysql-community-server
 
@@ -45,6 +47,7 @@ mysql -uroot -p
 set global validate_password_policy=0;
 set global validate_password_length=1;
 ALTER USER 'root'@'localhost' IDENTIFIED BY 'new password';
+FLUSH  PRIVILEGES;
 
 yum -y remove mysql57-community-release-el7-10.noarch
 
