@@ -72,7 +72,7 @@ input[type^="radio"]{border:0;background:0;width:auto}
 #article h1{font-size:26px;line-height:30px;padding-bottom:10px}
 .text{margin:10px 0;color:#333;font-size:14px}
 .text b,.text strong{font-weight:600}
-.text p{text-indent:20px;padding-bottom:15px;line-height:26px}
+.text p{/*text-indent:20px;*/padding-bottom:15px;line-height:26px}
 .text h5{font-size:14px;border:1px dashed #DDD;background:#f1f1f1;padding:4px 10px}
 .text a{color:#049}
 .text a:hover{text-decoration:underline}
