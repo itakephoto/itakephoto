@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Linux8安装Superset 4.0.2过程 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="/">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	
+			
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+	<h1>Linux8安装Superset 4.0.2过程</h1>
+
+<div class="text">
+ <p>
+	官方教程：<a href="https://superset.apache.org/docs/installation/pypi">PyPI | Superset (apache.org)</a> 
+</p>
+<p>
+	查看Superset版本对应的python版本：<a href="https://pypi.org/project/apache-superset/">apache-superset · PyPI</a>，可见Superset最新版本为：4.0.2，对应支持python版本为：3.9 3.10 3.11
+</p>
+<p>
+	本次安装采用源码编译的python 3.11.0，编译前需提前安装以下包：
+</p>
+<p>
+	yum install sqlite-devel
+</p>
+<p>
+	yum install bzip2-devel&nbsp;
+</p>
+<p>
+	然后再重新编译python源码，即可解决安装Superset时遇到的两个问题：
+</p>
+<p>
+	<span style="background-color:#E56600;"></span><span style="background-color:#E56600;">ModuleNotFoundError: No module named '_sqlite3'</span> 
+</p>
+<p>
+	<span style="background-color:#E56600;">ModuleNotFoundError: No module named '_bz2'</span> 
+</p>
+<p>
+	<br />
+</p>
+<p>
+	以下是编译python源码的步骤：
+</p>
+<p>
+	wget -c https://www.python.org/ftp/python/3.11.0/Python-3.11.0.tgz
+</p>
+<p>
+	tar -zxvf Python-3.11.0.tgz
+</p>
+<p>
+	cd Python-3.11.0/
+</p>
+<p>
+	<span style="line-height:1.5;">&nbsp;./configure --prefix=/usr/python3.11.0</span> 
+</p>
+<p>
+	<span style="line-height:1.5;">make</span> 
+</p>
+<p>
+	<span style="line-height:1.5;">make install</span> 
+</p>
+<p>
+	编译成功后，需要把原有系统的python更换成最新安装的版本
+</p>
+<p>
+	rm -rf /usr/bin/python<br />
+rm -rf /usr/bin/python3<br />
+rm -rf /usr/local/bin/pip<br />
+rm -rf /usr/local/bin/pip3<br />
+ln -s&nbsp; /usr/python3.11.0/bin/python3 /usr/bin/python<br />
+ln -s&nbsp; /usr/python3.11.0/bin/python3 /usr/bin/python3<br />
+python -V<br />
+ln -s /usr/python3.11.0/bin/pip3 /usr/local/bin/pip3<br />
+ln -s /usr/python3.11.0/bin/pip3 /usr/local/bin/pip<br />
+pip -V
+</p>
+<p>
+	至此python 3.11.0环境已经安装完毕，开始进入安装Superset的踩坑过程。以下是安装Superset的目标：
+</p>
+<p>
+	1）metadata需要安装在mysql上
+</p>
+<p>
+	2）官方examples需要安装在mysql上，并且需安装所有的examples
+</p>
+<p>
+	3）必须是Superset 4.0.2版本
+</p>
+<p>
+	<br />
+<strong>1：</strong><strong>Installing and Initializing Superset</strong> 
+</p>
+<p>
+	pip install apache-superset==4.0.2 -i https://pypi.tuna.tsinghua.edu.cn/simple/
+</p>
+<p>
+	很顺利的安装完成，此时需要安装pymysql，并修改配置文件把superset database修改为mysql
+</p>
+<p>
+	pip install pymysql
+</p>
+<p>
+	vi /usr/python3.11.0/lib/python3.11/site-packages/superset/config.py<br />
+修改此处内容：SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://root@localhost/superset4'
+</p>
+<p>
+	注意请提前安装mysql数据库及创建database：<span>superset4，然后开始执行初始化</span> 
+</p>
+<p>
+	superset db upgrade
+</p>
+<p>
+	如果此时重复出现上述<span style="background-color:#E56600;">&nbsp;'_sqlite3'<span style="background-color:;">&nbsp;</span></span>及&nbsp;<span style="background-color:#E56600;">&nbsp;'_bz2'<span style="background-color:;">&nbsp;</span></span>，可以手工的拷贝文件到python lib目录
+</p>
+<p>
+	<span style="background-color:;">cp /root/Python-3.11.0/build/lib.linux-x86_64-3.11/_bz2.cpython-311-x86_64-linux-gnu.so /usr/python3.11.0/lib/python3.11/lib-dynload/</span> 
+</p>
+<p>
+	<span style="background-color:;">再次执行初始化，又出现了新的问题：</span> 
+</p>
+<p>
+	<span style="background-color:;"><span style="background-color:#E56600;"></span><span style="background-color:#E56600;">A Default SECRET_KEY was detected, please use superset_config.py to override it.</span><br />
+<span style="background-color:#E56600;">Use a strong complex alphanumeric string and use a tool to help you generate&nbsp;</span><br />
+<span style="background-color:#E56600;">a sufficiently random sequence, ex: openssl rand -base64 42</span></span> 
+</p>
+<p>
+	<span style="background-color:;">按照提示执行：openssl rand -base64 42 并把内容复制到一个新建的配置文件中：</span> 
+</p>
+<p>
+	<span style="background-color:;">vi /usr/python3.11.0/bin/superset_config.py</span> 
+</p>
+<p>
+	<span style="background-color:;">SECRET_KEY = 'n36bYFh40TLkH0PpYdq/CebkTxX1GxbEogdIbCQZ3IvScW96TK1+MYrN'</span> 
+</p>
+<p>
+	<span style="background-color:;">再次执行：<span>superset db upgrade&nbsp; 成功了</span></span> 
+</p>
+<p>
+	<span style="background-color:;"></span> 
+</p>
+<br />
+<p>
+	<span style="background-color:;"><strong>2：Create an admin user in your metadata database</strong><br />
+</span> 
+</p>
+<p>
+	<span style="background-color:;">export FLASK_APP=superset<br />
+superset fab create-admin<br />
+<br />
+</span> 
+</p>
+<p>
+	<span style="background-color:;"><strong>3：导入官方examples</strong><br />
+</span> 
+</p>
+<p>
+	<span style="background-color:;">由于官方的案例数据是存放在GitHub上的，网络连接不稳定，经常性报错。所以必须去GitHub网站手动下载所有文件到本地：<a href="https://github.com/apache-superset/examples-data/">apache-superset/examples-data (github.com)</a></span> 
+</p>
+<p>
+	<span style="background-color:;">/root/examples-data-master</span> 
+</p>
+<p>
+	<span style="background-color:;">进入目录后，启动python自带的http服务，即可通过浏览器浏览案例文件：http://192.168.142.129:9999/</span> 
+</p>
+<p>
+	<span style="background-color:;">python3 -m http.server 9999</span> 
+</p>
+<p>
+	<span style="background-color:;"><br />
+</span> 
+</p>
+<p>
+	<span style="background-color:;">修改配置文件：/usr/python3.11.0/lib/python3.11/site-packages/superset/examples/helpers.py</span> 
+</p>
+<p>
+	<span style="background-color:;">BASE_URL = "http://192.168.142.129:9999/"</span> 
+</p>
+<p>
+	同时修改此目录的所有yaml文件内容，把data网址https://raw.githubusercontent.com/改成前面的本地地址，如
+</p>
+<p>
+	/usr/python3.11.0/lib/python3.11/site-packages/superset/examples/configs/datasets/examples
+</p>
+<p>
+	vi <span>users_channels.csv</span> 
+</p>
+<p>
+	<span style="background-color:;">data: http://192.168.142.129:9999/datasets/examples/slack/users_channels.csv</span> 
+</p>
+<p>
+	<br />
+</p>
+<p>
+	创建mysql数据库名为：main，不知道为何必须是这个名字，否则会报以下错误：
+</p>
+<p>
+	<span style="background-color:#E56600;"></span><span style="background-color:#E56600;">(pymysql.err.OperationalError) (1049, "Unknown database 'main'")</span> 
+</p>
+<p>
+	再次修改配置文件，修改examples的数据库为mysql数据库
+</p>
+<p>
+	vi&nbsp;/usr/python3.11.0/lib/python3.11/site-packages/superset/config.py
+</p>
+<p>
+	SQLALCHEMY_EXAMPLES_URI = 'mysql+pymysql://root@localhost/main'
+</p>
+<p>
+	<br />
+</p>
+<p>
+	如果采用mysql数据库的话，superset连接mysql时会出现以下错误
+</p>
+<p>
+	<span style="background-color:#E56600;">ModuleNotFoundError: No module named 'MySQLdb'</span> 
+</p>
+<p>
+	需要安装pip install pymysql,并且修改文件
+</p>
+<p>
+	vi /usr/python3.11.0/lib/python3.11/site-packages/superset/db_engine_specs/mysql.py
+</p>
+<p>
+	在import MySQLdb前添加
+</p>
+<p>
+	import pymysql<br />
+pymysql.install_as_MySQLdb()
+</p>
+<p>
+	终于可以执行导入官方案例数据了，数据量比较多，需要耐心等待执行完成
+</p>
+<p>
+	superset load_examples
+</p>
+<p>
+	superset init
+</p>
+<p>
+	<br />
+</p>
+<p>
+	<strong>4：To start a development web server on port 8088, use -p to bind to another port</strong><br />
+superset run -h 0.0.0.0 -p 8088 --with-threads --reload --debugger
+</p>
+<p>
+	<br />
+</p>
+<p>
+	以下是官方的Dashboards:
+</p>
+<p>
+	<br />
+</p>
+<p>
+	<span style="background-color:;"></span> 
+</p>
+<p>
+	<span style="background-color:;"></span> 
+</p>
+<img src="/content/97-1.png" /><br />
+<img src="/content/97-2.png" /><br />
+<img src="/content/97-3.png" /><br />
+   
+<p>
+</p>
+</div>
+ </div>
+  </div>
+   </div>
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="/">@Lijiahong</a></p>
+</div>
+</body>
+</html>
