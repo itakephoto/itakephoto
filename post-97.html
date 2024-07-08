@@ -108,6 +108,38 @@ pip -V
 <p>
 	3）必须是Superset 4.0.2版本
 </p>
+	<p>
+	<br />
+</p>
+<p>
+	以下是安装MySQL8，并创建superset metadata数据库及example数据库的步骤
+</p>
+<p>
+	yum install mysql-server
+</p>
+<p>
+	systemctl start mysqld
+</p>
+<p>
+	mysql -u root -p
+</p>
+<p>
+	alter<span> </span>user<span style="color:#333333;font-family:Consolas, &quot;background-color:#F4F4F4;">&nbsp;</span>'root'@'localhost' IDENTIFIEDBY<span style="color:#333333;font-family:Consolas, &quot;background-color:#F4F4F4;">&nbsp;</span>'123456';
+</p>
+<p>
+	CREATE DATABASE superset4 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+</p>
+<p>
+	CREATE DATABASE main DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+</p>
+<p>
+	GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+</p>
+<p>
+	FLUSH PRIVILEGES;
+</p>
+<p>
+</p>
 <p>
 	<br />
 <strong>1：</strong><strong>Installing and Initializing Superset</strong> 
