@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Superset 4.0.2免密登录及iframe嵌入到自定义网站 - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	
+			
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+<p>
+	本文将总结Superset4.0.2如何免登录嵌入自定义网站iframe中。
+</p>
+<p>
+	1: 开启Superset免密码登录。
+</p>
+<p>
+	2: Nginx安装及跨域配置。
+</p>
+<p>
+	3: 自定义网站演示iframe嵌入Superset
+</p>
+<p>
+	<br />
+</p>
+<h4>
+	<span><strong>1: 开启Superset免密码登录。</strong><strong></strong></span> 
+</h4>
+<p>
+	<span>修改superset配置文件<span style="background-color:#E56600;">&nbsp;</span><span style="background-color:#E56600;">/usr/python3.11.0/bin/superset_config.py</span>，添加内容：</span> 
+</p>
+<p>
+	<span>PUBLIC_ROLE_LIKE: Optional[str] = "Gamma"</span> 
+</p>
+<p>
+	<span>HTTP_HEADERS = {'X-Frame-Options': ' ALLOWALL'}<br />
+WTF_CSRF_ENABLED = False<br />
+</span> 
+</p>
+<p>
+	<span><br />
+</span> 
+</p>
+<p>
+	<span>然后登录superset进去<span style="background-color:#E56600;">List </span><span style="background-color:#E56600;">Roles</span>管理，给Public添加以下权限：</span> 
+</p>
+<p>
+	<span>can explore on Superset</span> 
+</p>
+<p>
+	<span>can explore json on Superset</span> 
+</p>
+<p>
+	<span>all database access on all_database_access</span> 
+</p>
+<p>
+	<span><br />
+</span> 
+</p>
+<p>
+	重启superset后再进去，检查是否需要登录。
+</p>
+<p>
+	export FLASK_APP=superset
+</p>
+<p>
+	superset run -h 0.0.0.0 -p 8088 --with-threads --reload --debugger
+</p>
+<p>
+	<br />
+</p>
+<h4>
+	<span><strong>2: Nginx安装及跨域配置。</strong></span> 
+</h4>
+<p>
+	<span>Nginx安装比较简单，直接<span style="background-color:#E56600;">yum install nginx</span></span> 
+</p>
+<p>
+	关闭SELINUX，<span style="background-color:#E56600;">vi /etc/selinux/config</span>，或者可以临时关闭&nbsp;<span style="background-color:#E56600;">setenforce 0</span> 
+</p>
+<p>
+	SELINUX=disabled
+</p>
+<p>
+	<br />
+</p>
+<p>
+	修改nginx配置文件：<span style="background-color:#E56600;">v</span><span style="background-color:#E56600;">i /etc/nginx/nginx.conf </span>添加iframe嵌入和跨域允许
+</p>
+<p>
+	server {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; listen 80;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; server_name localhost;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; root&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;/usr/share/nginx/html;<br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; # Load configuration files for the default server block.<br />
+&nbsp; &nbsp; &nbsp; &nbsp; #include /etc/nginx/default.d/*.conf;<br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; location / {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;proxy_hide_header X-Frame-Options;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;add_header X-Frame-Options ALLOWALL;
+</p>
+<p>
+	<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;add_header 'Access-Control-Allow-Origin' '*';<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;add_header 'Access-Control-Allow-Headers' 'DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Authorization';<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+</p>
+<p>
+	&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if ($request_method = 'OPTIONS') {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;add_header 'Content-Type' 'text/plain; charset=utf-8';<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;add_header 'Content-Length' 0;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;return 204;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;}<br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; proxy_pass http://192.168.1.4:8088;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; }<br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; error_page 404 /404.html;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; location = /40x.html {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; }<br />
+<br />
+&nbsp; &nbsp; &nbsp; &nbsp; error_page 500 502 503 504 /50x.html;<br />
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; location = /50x.html {<br />
+&nbsp; &nbsp; &nbsp; &nbsp; }<br />
+&nbsp; &nbsp; }
+</p>
+<p>
+	<br />
+</p>
+<p>
+	修改完配置文件后重启nginx
+</p>
+<p>
+	systemctl restart nginx
+</p>
+<p>
+	cat /var/log/nginx/error.log
+</p>
+<p>
+	<br />
+</p>
+<h4>
+	<span><strong>3: 自定义网站演示iframe嵌入Superset</strong></span> 
+</h4>
+<p>
+	从superset拿到需要嵌入的图表的<span style="background-color:#E56600;">Embed Code</span> 
+</p>
+<p>
+	<span style="color:#333333;font-family:Inter, Helvetica, Arial;font-size:14px;background-color:#F7F7F7;">&lt;iframe
+  width="600"
+  height="400"
+  seamless
+  frameBorder="0"
+  scrolling="no"
+  src="http://192.168.1.4:80/superset/explore/p/DZYqpGnWr4v/?standalone=1&amp;height=400"
+&gt;
+&lt;/iframe&gt;</span> 
+</p>
+<p>
+	<span style="color:#E56600;">注意，需要讲src的网址改成nginx的ip及端口</span> 
+</p>
+<p>
+	<span style="color:#E56600;"><br />
+</span> 
+</p>
+<p>
+	<span>然后把上面的iframe代码加入自定义开发的网页中，即可打开。</span> 
+</p>
+<p>
+	<span style="color:#E56600;"><img src="/content/98-1.png" alt="" /><br />
+</span> 
+</p>
+
+</div>
+
+	</div>
+
+</div>
+</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
