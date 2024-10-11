@@ -73,8 +73,9 @@ var diagGraph = {
       let edgeOptions = {
         arrowhead: 'vee',
         label: el.option.label || '',
-        labelStyle: `fill: ${el.option.labelColor || '#000'}; font-size: ${el.option.fontSize || '10px'}; color: ${el.option.fontColor || '#000'};`
-      };
+        labelStyle: `fill: ${el.option.labelColor || '#000'}; font-size: ${el.option.fontSize || '10px'}; color: ${el.option.fontColor || '#000'};`,
+        curve: d3.curveBasis // Use d3.curveBasis for smooth curves
+	  };
       if (el.start === this.statePoint || el.end === this.statePoint) {
         edgeOptions.style = 'stroke: #0fb2cc; fill: none;';
         edgeOptions.arrowheadStyle = 'fill: #0fb2cc;stroke: #0fb2cc;';
