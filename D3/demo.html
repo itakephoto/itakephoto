@@ -1,0 +1,315 @@
+<!doctype html>
+<html>
+<meta charset="utf-8">
+<title>Dagre D3 Demo</title>
+
+<script src="d3.min.js" charset="utf-8"></script>
+<script src="dagre-d3.js"></script>
+<script src="diag.js"></script> 
+
+<script>
+var diagGraph = {
+  //diag图数据操作
+  state: [],
+  edg: [],
+  statePoint: '',
+  g: '',
+  init: function(statePoint, state, edg) {
+    this.statePoint = statePoint
+    this.state = state
+    this.edg = edg
+    this.createG()
+    this.renderG()
+  },
+  createG: function() {
+    this.g = new dagreD3.graphlib.Graph()
+      .setGraph({})
+      .setDefaultEdgeLabel(function() {
+        return {}
+      })
+  },
+  drawNode: function() {
+    for (let i in this.state) {
+      //画点
+      let el = this.state[i]
+      let style = ''
+      if (el.id === this.statePoint) {
+        if (el.class === 'type-suss') {
+          style = 'stroke: #35b34a; stroke-width: 1px;'
+        } else if (el.class === 'type-fail') {
+          style = 'stroke:#f15533; stroke-width: 1px;'
+        } else if (el.class === 'type-normal') {
+          style = 'stroke:#a5e0ee; stroke-width: 1px;'
+        } else if (el.class === 'type-init') {
+          style = 'stroke:#a5e0ee; stroke-width: 1px;'
+        } else if (el.class === 'type-ready') {
+          style = 'stroke:#a5e0ee; stroke-width: 1px;'
+        } else if (el.class === 'type-queue') {
+          style = 'stroke:#a5e0ee; stroke-width: 1px;'
+        } else if (el.class === 'type-run') {
+          style = 'stroke:#a5e0ee; stroke-width: 1px;'
+        } else if (el.class === 'type-freeze') {
+          style = 'stroke:grey; stroke-width: 1px;'
+        }
+      }
+      this.g.setNode(el.id, {
+        id: el.id,
+        label: el.label,
+        class: el.class,
+        style: style
+      })
+    }
+    this.g.nodes().forEach(v => {
+      //画圆角
+      var node = this.g.node(v)
+      // Round the corners of the nodes
+      node.rx = node.ry = 5
+    })
+  },
+  drawEdg: function() {
+    for (let i in this.edg) {
+      // 画连线
+      let el = this.edg[i]
+      let edgeOptions = {
+        arrowhead: 'vee',
+        label: el.option.label || '',
+        labelStyle: `fill: ${el.option.labelColor || '#000'}; font-size: ${el.option.fontSize || '10px'}; color: ${el.option.fontColor || '#000'};`
+      };
+      if (el.start === this.statePoint || el.end === this.statePoint) {
+        edgeOptions.style = 'stroke: #0fb2cc; fill: none;';
+        edgeOptions.arrowheadStyle = 'fill: #0fb2cc;stroke: #0fb2cc;';
+      }
+      this.g.setEdge(el.start, el.end, edgeOptions);
+    }
+  },
+  renderG: function() {
+    var render = new dagreD3.render()
+    var svg = d3.select('#svgCanvas')
+    svg.select('g').remove() //删除以前的节点
+    svg.append('g')
+    var inner = svg.select('g')
+
+    var zoom = d3.zoom().on('zoom', function() {
+      //放大
+      inner.attr('transform', d3.event.transform)
+    })
+    svg.call(zoom)
+
+    this.drawNode()
+    this.drawEdg()
+    render(d3.select('svg g'), this.g) //渲染节点
+
+    var max =
+      svg.node().clientWidth > svg.node().clientHeight
+        ? svg.node().clientWidth
+        : svg.node().clientHeight
+    var initialScale = max / 779
+    var tWidth =
+      (svg.node().clientWidth - this.g.graph().width * initialScale) / 2
+    var tHeight =
+      (svg.node().clientHeight - this.g.graph().height * initialScale) / 2
+
+    svg.call(
+      zoom.transform,
+      d3.zoomIdentity.translate(tWidth, tHeight).scale(initialScale)
+    ) //元素居中
+  },
+  changePoint: function(point) {
+    this.statePoint = point * 1.0
+    this.renderG()
+  }
+}
+
+</script>
+
+<style id="css">
+
+body {
+overflow: hidden;
+margin: 0 auto;
+color: #333;
+font-weight: 300;
+font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+}
+
+h1 {
+font-size: 3em;
+font-weight: 300;
+}
+
+h2 {
+font-size: 1.5em;
+font-weight: 300;
+}
+
+section {
+margin-bottom: 3em;
+}
+
+section p {
+text-align: justify;
+}
+
+svg {
+overflow: hidden;
+margin: 0 auto;
+}
+
+pre {
+border: 1px solid #ccc;
+}
+
+
+
+/* This sets the color for "TK" nodes to a light blue green. */
+
+g.type-suss>rect {
+fill: #ddefd3;
+}
+
+.node text {
+font-weight: 300;
+font-family: "Helvetica Neue", Helvetica, Arial, sans-serf;
+font-size: 12px;
+pointer-events: none;
+text-anchor: middle;
+fill: white;
+}
+
+.label g text tspan:last-child {
+font-size: 10px;
+margin-top: 5px;
+dy: 1.5em;
+}
+
+.label g {
+transform: translate(0, -13px);
+}
+
+.node rect {
+fill: white;
+stroke-width: 0px;
+color: white;
+}
+
+.edgePath path {
+stroke: rgb(78, 78, 78);
+stroke-width: 1px;
+}
+
+g.type-init>rect {
+fill: rgba(0, 91, 252, 0.4);
+}
+
+g.type-ready>rect {
+fill: rgba(0, 91, 252, 0.6);
+}
+
+g.type-queue>rect {
+fill: rgba(0, 91, 252, 0.8);
+}
+
+g.type-run>rect {
+fill: rgba(0, 91, 252, 1);
+}
+
+g.type-suss>rect {
+fill: #3EBB44;
+}
+
+g.type-fail>rect {
+fill: #E93A3A;
+
+}
+
+g.type-freeze>rect {
+fill: #f2f3f7;
+}
+
+.type-freeze text {
+fill: #999999;
+}
+
+#myMenu{
+position: absolute;
+display: none;
+width: 100px;
+height: 100px;
+background: #999999;
+}
+</style>
+
+<body>
+
+<svg style="width:100%;height:900" id="svgCanvas"></svg>
+
+<ul id="myMenu">
+  <li>属性</li>
+  <li>代码</li>
+</ul>
+
+<script id="js">
+  var state = [
+    { "id": "aaaa", label: 'START\n虚拟节点', class: 'type-freeze' },
+    { "id": "bbbb", label: 'END\n虚拟节点', class: 'type-freeze' },
+    { 'id':  1, label: 'V1:hive-sql1-超长节点名字，看看你支持多长', class: 'type-run' },
+    { 'id':  2, label: 'V2:hive-sql2', class: 'type-suss' },
+    { 'id':  3, label: 'V3:hive-sql3', class: 'type-init' },
+    { 'id':  4, label: 'V4:hive-sql4', class: 'type-ready' },
+{ 'id':  5, label: 'V5:hive-sql5', class: 'type-queue' },
+{ 'id':  6, label: 'V6:hive-sql6', class: 'type-suss' },
+{ 'id':  7, label: 'V7:hive-sql7', class: 'type-suss' },
+{ 'id':  8, label: 'V8:hive-sql8', class: 'type-suss' },
+{ 'id':  9, label: 'V9:hive-sql9', class: 'type-suss' },
+{ 'id':  10, label: 'V10:hive-sql10', class: 'type-fail' }
+  ]
+  var edg = [
+  { start: 'aaaa', end: 1, option: { label: "Edge 1", labelColor: "#ff0000", fontSize: "14px", fontColor: "#0000ff" } },
+  { start: 'aaaa', end: 2, option: { label: "Edge 2", labelColor: "#00ff00", fontSize: "12px", fontColor: "#ff00ff" } },
+  { start: 'aaaa', end:4, option: {} },
+{ start: 'aaaa', end:5, option: {} },
+{ start: 'aaaa', end:6, option: {} },
+{ start: 'aaaa', end:7, option: {} },
+{ start: 7, end:8, option: {} },
+{ start: 8, end:9, option: {} },
+{ start: 9, end:10, option: {} },
+{ start: 1, end: 3, option: {} },
+{ start: 2, end: 3, option: {} },
+{ start: 3, end: 'bbbb', option: {} },
+{ start: 4, end: 'bbbb', option: {} },
+{ start: 5, end: 'bbbb', option: {} },
+{ start: 6, end: 'bbbb', option: {} },
+{ start: 10, end: 'bbbb', option: {} }
+  ]
+  
+  var statePoint = 1; // 当前选中的点
+  diagGraph.init(statePoint, state, edg); //创建关系图
+
+  var svgCanvas = document.getElementById('svgCanvas'); //绑定事件鼠标点击
+  svgCanvas.addEventListener('click', function (e) {
+    e.preventDefault();
+    if (e.target.tagName === 'rect') {
+      diagGraph.changePoint(e.target.parentNode.id);
+    }
+  })
+
+
+  var myMenu = document.getElementById("myMenu"); //鼠标右键
+  svgCanvas.addEventListener("contextmenu", (event) => { //鼠标右击事件
+    event.preventDefault();
+    if (event.target.tagName === 'rect') {
+      myMenu.style.top = event.clientY + "px";
+      myMenu.style.left = event.clientX + "px";
+      myMenu.style.display = 'block'
+      // this.myMenuShow = true
+    }
+  });
+  
+  
+  document.addEventListener("click", (event) => {
+    myMenu.style.display = 'none'
+  });
+
+</script>
+</body>
+</html>
