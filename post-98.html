@@ -43,6 +43,9 @@
 	3: 自定义网站演示iframe嵌入Superset
 </p>
 <p>
+	4: URL传参数实现动态查询
+</p>
+<p>
 	<br />
 </p>
 <h4>
@@ -52,12 +55,16 @@
 	<span>修改superset配置文件<span style="background-color:#E56600;">&nbsp;</span><span style="background-color:#E56600;">/usr/python3.11.0/bin/superset_config.py</span>，添加内容：</span> 
 </p>
 <p>
-	<span>PUBLIC_ROLE_LIKE: Optional[str] = "Gamma"</span> 
-</p>
-<p>
-	<span>HTTP_HEADERS = {'X-Frame-Options': ' ALLOWALL'}<br />
+<span>HTTP_HEADERS = {'X-Frame-Options': ' ALLOWALL'}<br />
 WTF_CSRF_ENABLED = False<br />
 </span> 
+</p>
+
+<p>
+	<span>修改superset配置文件<span style="background-color:#E56600;">&nbsp;</span><span style="background-color:#E56600;">/usr/python3.11.0/lib/python3.11/site-packages/superset/config.py</span>，添加内容：</span> 
+</p>
+<p>
+	<span>PUBLIC_ROLE_LIKE: Optional[str] = "Gamma"</span> 
 </p>
 <p>
 	<span><br />
@@ -204,10 +211,38 @@ WTF_CSRF_ENABLED = False<br />
 </span> 
 </p>
 
+<h4>
+	<span><strong>4: URL传参数实现动态查询</strong></span> 
+</h4>
+
+在配置文件修改内容：<span style="background-color:#E56600;">vi /usr/python3.11.0/bin/superset_config.py<br />
+</span>
+<p>
+	"ENABLE_TEMPLATE_PROCESSING": True
+</p>
+<p>
+	<br />
+</p>
+<p>
+	然后在dataset修改SQL,比如：
+</p>
+<p>
+	SELECT *<br />
+FROM tbl<br />
+WHERE dttm_col &gt; '{{ from_dttm }}' and dttm_col &lt; '{{ to_dttm }}'<br />
+</p>
+<p>
+	参考网站
+</p>
+<p>
+	<a href="https://superset.apache.org/docs/configuration/sql-templating/#jinja-templates" target="_blank">https://superset.apache.org/docs/configuration/sql-templating/#jinja-templates</a>
+</p>
+<p>
+	<a href="https://www.cnblogs.com/datawalkman/p/15117945.html" target="_blank">https://www.cnblogs.com/datawalkman/p/15117945.html</a>
+</p>
+
 </div>
-
-	</div>
-
+</div>
 </div>
 </div>
 
