@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>如何通过Azure Service Principal调用Power BI Rest API - Lijiahong</title>
+<meta name="keywords" content="lijiahong" />
+<meta name="description" content="content" />
+<link href="https://lijiahong.com/style.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+<div id="wrap">
+	
+<div id="header">
+    <div class="logo"><a href="https://lijiahong.com">Lijiahong</a><p>只是一点学习笔记而已</p></div>
+    <div id="navigation">
+	
+		<ul id="nav">
+	
+			
+		</ul>
+
+    </div>
+</div>
+
+<div class="line" style="height:1px;width:100%;border-bottom:1px solid blue;">
+
+</div>
+
+<div id="content">
+<div id="main_page">
+<div id="article">
+<!-- Start -->
+
+<h2>
+	本文将总结如何通过Azure Service Principal调用Power BI Rest API。
+</h2>
+<br />
+<p>
+	<strong>1：在Azure -&gt; Microsoft Entra ID -&gt; App registratios 新建一个registration，并记录相关信息</strong> 
+</p>
+<p>
+	Display name : sp_test
+</p>
+<p>
+	Client ID :&nbsp;2413efa3-b380-495c-97dd-c9bd18d2cd68
+</p>
+<p>
+	Tenant ID:&nbsp;d578c1bf-6d49-4e3f-8e2f-1da869f2e01f
+</p>
+<p>
+	Client secret :&nbsp;W7Z8Q~SSbSWrIWG9o-lK6exvzmOVe5o.KQinHc2Q
+</p>
+<p>
+	<br />
+</p>
+<p>
+	<strong>2</strong><strong>：</strong> <strong>在Azure -&gt; Microsoft Entra ID -&gt; Group -&gt; 新建</strong><strong>Security Group，并把第一步的sp_test添加进Members里</strong> 
+</p>
+<p>
+	Group Name :&nbsp;<span style="font-family:&quot;font-size:medium;">G_PowerBI</span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;">Type : Security</span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><img src="https://lijiahong.com/content/99-1.png" alt="" /><br />
+</span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><br />
+</span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><strong>3</strong><strong>：</strong><span><strong>进入Power BI -&gt; Admin Portal -&gt; Tenant settings 设置允许</strong><span style="color:#333333;font-family:&quot;font-size:14px;background-color:#FEF7B2;"><strong>Service principals can use APIs，并Apply第二步的Group</strong></span></span></span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span><img src="https://lijiahong.com/content/99-2.png" alt="" /></span></span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span><br />
+</span></span>
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span><strong>4</strong><strong>：通过Azure API 获取access token</strong></span></span>
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span>POST : https://login.microsoftonline.com/<span>d578c1bf-6d49-4e3f-8e2f-1da869f2e01f/oauth2/v2.0/token</span></span></span>
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span><span><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">Content-Type :&nbsp;<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">application/x-www-form-urlencoded</span></span></span></span></span>
+</p>
+<p>
+	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><em><strong>Body:</strong></em></span>
+</p>
+<p>
+	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">grant_type : client_credentials</span><br />
+<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">client_id : <span>&nbsp;2413efa3-b380-495c-97dd-c9bd18d2cd68</span></span><br />
+<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">client_secret : <span>W7Z8Q~SSbSWrIWG9o-lK6exvzmOVe5o.KQinHc2Q</span></span><br />
+<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">scope :&nbsp; https://analysis.window.net/powerbi/api/.default</span></span><span style="font-family:&quot;font-size:medium;"></span>
+</p>
+<p>
+	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><br />
+</span></span>
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span><span></span></span></span>
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span><strong>5: 使用access token 请求Power BI Rest&nbsp;API，比如refresh dataset</strong></span></span>
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span>POST https://api.powerbi.com/v1.0/myorg/datasets/cfafbeb1-8037-4d0c-896e-a46fb27ff229/refreshes</span></span>
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span>Headers Authorization Bearer access token</span></span>
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span>更多API请查看：<a href="https://learn.microsoft.com/en-us/rest/api/power-bi/datasets/refresh-dataset" target="_blank">https://learn.microsoft.com/en-us/rest/api/power-bi/datasets/refresh-dataset</a></span></span>
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><br />
+</span>
+</p>
+
+<!-- End -->
+</div>
+</div>
+</div>
+</div>
+
+<div style="clear:both;"></div>
+<div id="footer">
+<p><a href="https://lijiahong.com">@Lijiahong</a></p>
+ 
+</div>
+</body>
+</html>
