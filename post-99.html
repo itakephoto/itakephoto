@@ -31,7 +31,6 @@
 <div id="main_page">
 <div id="article">
 <!-- Start -->
-
 <h2>
 	本文将总结如何通过Azure Service Principal调用Power BI Rest API。
 </h2>
@@ -79,50 +78,62 @@
 </p>
 <p>
 	<span style="font-family:&quot;font-size:medium;"><span><br />
-</span></span>
+</span></span> 
 </p>
 <p>
-	<span style="font-family:&quot;font-size:medium;"><span><strong>4</strong><strong>：通过Azure API 获取access token</strong></span></span>
+	<span style="font-family:&quot;font-size:medium;"><span><strong>4</strong><strong>：通过Azure API 获取access token</strong></span></span> 
 </p>
 <p>
-	<span style="font-family:&quot;font-size:medium;"><span>POST : https://login.microsoftonline.com/<span>d578c1bf-6d49-4e3f-8e2f-1da869f2e01f/oauth2/v2.0/token</span></span></span>
+	<span style="font-family:&quot;font-size:medium;"><span>POST : https://login.microsoftonline.com/<span>d578c1bf-6d49-4e3f-8e2f-1da869f2e01f/oauth2/v2.0/token</span></span></span> 
 </p>
 <p>
-	<span style="font-family:&quot;font-size:medium;"><span><span><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">Content-Type :&nbsp;<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">application/x-www-form-urlencoded</span></span></span></span></span>
+	<span style="font-family:&quot;font-size:medium;"><span><span><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">Content-Type :&nbsp;<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">application/x-www-form-urlencoded</span></span></span></span></span> 
 </p>
 <p>
-	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><em><strong>Body:</strong></em></span>
+	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><em><strong>Body:</strong></em></span> 
 </p>
 <p>
 	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">grant_type : client_credentials</span><br />
 <span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">client_id : <span>&nbsp;2413efa3-b380-495c-97dd-c9bd18d2cd68</span></span><br />
 <span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">client_secret : <span>W7Z8Q~SSbSWrIWG9o-lK6exvzmOVe5o.KQinHc2Q</span></span><br />
-<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">scope :&nbsp; https://analysis.window.net/powerbi/api/.default</span></span><span style="font-family:&quot;font-size:medium;"></span>
+<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;">scope :&nbsp; https://analysis.window.net/powerbi/api/.default</span></span><span style="font-family:&quot;font-size:medium;"></span> 
 </p>
 <p>
 	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><br />
-</span></span>
+</span></span> 
 </p>
 <p>
-	<span style="font-family:&quot;font-size:medium;"><span><span></span></span></span>
+	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><strong>5:&nbsp;</strong><strong>把第二补的Group加入Power BI workspace里面，并赋予admin权限</strong></span></span> 
 </p>
 <p>
-	<span style="font-family:&quot;font-size:medium;"><span><strong>5: 使用access token 请求Power BI Rest&nbsp;API，比如refresh dataset</strong></span></span>
+	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><img src="https://lijiahong.com/content/99-3.png" alt="" /></span></span> 
 </p>
 <p>
-	<span style="font-family:&quot;font-size:medium;"><span>POST https://api.powerbi.com/v1.0/myorg/datasets/cfafbeb1-8037-4d0c-896e-a46fb27ff229/refreshes</span></span>
+	官方设置文档请查看：<a href="https://learn.microsoft.com/en-us/power-bi/developer/embedded/embed-service-principal" target="_blank">https://learn.microsoft.com/en-us/power-bi/developer/embedded/embed-service-principal</a> 
 </p>
 <p>
-	<span style="font-family:&quot;font-size:medium;"><span>Headers Authorization Bearer access token</span></span>
+	<span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><span style="color:#191B1F;font-family:-apple-system, BlinkMacSystemFont, &quot;font-size:medium;background-color:#FFFFFF;"><br />
+</span></span> 
 </p>
 <p>
-	<span style="font-family:&quot;font-size:medium;"><span>更多API请查看：<a href="https://learn.microsoft.com/en-us/rest/api/power-bi/datasets/refresh-dataset" target="_blank">https://learn.microsoft.com/en-us/rest/api/power-bi/datasets/refresh-dataset</a></span></span>
+	<span style="font-family:&quot;font-size:medium;"><span><span></span></span></span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span><strong>6: 使用access token 请求Power BI Rest&nbsp;API，比如refresh dataset</strong></span></span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span>POST https://api.powerbi.com/v1.0/myorg/datasets/cfafbeb1-8037-4d0c-896e-a46fb27ff229/refreshes</span></span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span>Headers Authorization Bearer access token</span></span> 
+</p>
+<p>
+	<span style="font-family:&quot;font-size:medium;"><span>更多API请查看：<a href="https://learn.microsoft.com/en-us/rest/api/power-bi/datasets/refresh-dataset" target="_blank">https://learn.microsoft.com/en-us/rest/api/power-bi/datasets/refresh-dataset</a></span></span> 
 </p>
 <p>
 	<span style="font-family:&quot;font-size:medium;"><br />
-</span>
+</span> 
 </p>
-
 <!-- End -->
 </div>
 </div>
