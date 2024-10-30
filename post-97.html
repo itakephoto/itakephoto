@@ -316,6 +316,27 @@ pymysql.install_as_MySQLdb()
 	<br />
 </p>
 <p>
+	<span style="background-color:#E56600;">UserWarning: Using the in-memory storage for tracking rate limits as no storage was explicitly specified.</span> 
+</p>
+<p>
+	yum install redis
+</p>
+<p>
+	systemctl enable redis
+</p>
+<p>
+	systemctl start redis
+</p>
+<p>
+	<br />
+</p>
+<p>
+	vi /usr/python3.11.0/lib/python3.11/site-packages/superset/config.py
+</p>
+	<p>
+	RATELIMIT_STORAGE_URI = "redis://localhost:6379"
+</p>
+<p>
 	<strong>4：To start a development web server on port 8088, use -p to bind to another port</strong><br />
 superset run -h 0.0.0.0 -p 8088 --with-threads --reload --debugger
 </p>
