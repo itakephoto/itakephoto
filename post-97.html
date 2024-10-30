@@ -119,6 +119,8 @@ pip -V
 </p>
 <p>
 	wget -c https://dev.mysql.com/get/mysql84-community-release-el8-1.noarch.rpm
+</p>
+<p>	
 	yum install mysql84-community-release-el8-1.noarch.rpm
 </p>
 <p>
@@ -132,8 +134,14 @@ pip -V
 </p>
 <p>
 	mysql -u root -p
+</p>
+<p>	
 	SHOW VARIABLES LIKE 'validate_password%';
+</p>
+<p>	
 	SET GLOBAL validate_password.length = 6;
+</p>
+<p>	
 	SET GLOBAL validate_password.policy = 'LOW';
 	
 </p>
