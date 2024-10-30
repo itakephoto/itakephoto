@@ -115,16 +115,30 @@ pip -V
 	以下是安装MySQL8，并创建superset metadata数据库及example数据库的步骤
 </p>
 <p>
-	yum install mysql-server
+	从MYSQL官网下载免费的yum包：https://dev.mysql.com/downloads/repo/yum/
+</p>
+<p>
+	wget -c https://dev.mysql.com/get/mysql84-community-release-el8-1.noarch.rpm
+	yum install mysql84-community-release-el8-1.noarch.rpm
+</p>
+<p>
+	yum install mysql-community-server 
 </p>
 <p>
 	systemctl start mysqld
 </p>
 <p>
-	mysql -u root -p
+	查看默认密码： grep "password" /var/log/mysqld.log
 </p>
 <p>
-	alter<span> </span>user<span style="color:#333333;font-family:Consolas, &quot;background-color:#F4F4F4;">&nbsp;</span>'root'@'localhost' IDENTIFIEDBY<span style="color:#333333;font-family:Consolas, &quot;background-color:#F4F4F4;">&nbsp;</span>'123456';
+	mysql -u root -p
+	SHOW VARIABLES LIKE 'validate_password%';
+	SET GLOBAL validate_password.length = 6;
+	SET GLOBAL validate_password.policy = 'LOW';
+	
+</p>
+<p>
+	alter<span> </span>user<span style="color:#333333;font-family:Consolas, &quot;background-color:#F4F4F4;">&nbsp;</span>'root'@'localhost' IDENTIFIED BY<span style="color:#333333;font-family:Consolas, &quot;background-color:#F4F4F4;">&nbsp;</span>'123456';
 </p>
 <p>
 	CREATE DATABASE superset4 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
